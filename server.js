@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws'
 import { createServer } from 'http'
 
-const PORT = process.env.PORT || 4000
+const PORT = process.env.PORT || 8080
 
 const server = createServer((req, res) => {
   res.writeHead(200)
