@@ -3,7 +3,11 @@ import { createServer } from 'http'
 
 const PORT = process.env.PORT || 4000
 
-const server = createServer()
+const server = createServer((req, res) => {
+  res.writeHead(200)
+  res.end('WebSocket server corriendo')
+})
+
 const wss = new WebSocketServer({ server })
 
 const clientes = new Set()
@@ -33,5 +37,5 @@ wss.on('connection', (ws) => {
 })
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor WebSocket corriendo en puerto ${PORT}`)
+  console.log(`Servidor corriendo en puerto ${PORT}`)
 })
