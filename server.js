@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws'
 import { createServer } from 'http'
 
-const PORT = 4000
+const PORT = process.env.PORT || 4000
 
 const server = createServer()
 const wss = new WebSocketServer({ server })
