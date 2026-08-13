@@ -5,9 +5,8 @@ import DetalleMesa from './components/DetalleMesa.jsx'
 import Stock from './components/Stock.jsx'
 import Resumen from './components/Resumen.jsx'
 import Login from './components/Login.jsx'
+import { iniciarSync } from './sync.js'
 import './App.css'
-import { supabase } from './supabase'
-import { iniciarSync, enviarCambio } from './sync.js'
 
 function App() {
   const [toast, setToast] = useState(null)
@@ -18,19 +17,6 @@ function App() {
   const [rol, setRol] = useState(null)
   const mesasRef = useRef(null)
 
-  async function probarConexion() {
-  const { data, error } = await supabase
-    .from('productos')
-    .select('*')
-
-  console.log('DATA:', JSON.stringify(data, null, 2))
-  console.log('ERROR:', error)
-}
-
-  useEffect(() => {
-    probarConexion()
-  }, [])
-
   useEffect(() => {
     initDB()
       .then(() => setDbReady(true))
@@ -38,14 +24,14 @@ function App() {
   }, [])
 
   useEffect(() => {
-  if (dbReady) {
-    iniciarSync(() => {
-      if (mesasRef.current) {
-        mesasRef.current.recargar()
-      }
-    })
-  }
-}, [dbReady])
+    if (dbReady) {
+      iniciarSync(() => {
+        if (mesasRef.current) {
+          mesasRef.current.recargar()
+        }
+      })
+    }
+  }, [dbReady])
 
   function mostrarToast(mensaje) {
     setToast(mensaje)
@@ -79,14 +65,7 @@ function App() {
   }
 
   return (
-    <div
-     style={{
-      width: '100%',
-      minHeight: '100vh',
-      padding: 0,
-      backgroundColor: '#0f1117'
-    }}
-   >
+    <div style={{ width: '100%', minHeight: '100vh', padding: 0, backgroundColor: '#0f1117' }}>
 
       <div style={{
         display: 'flex',
