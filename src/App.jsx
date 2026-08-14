@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { initDB } from './db/database.js'
-import Mesas from './components/Mesas.jsx'
+import Mesas from './components/mesas.jsx'
 import DetalleMesa from './components/DetalleMesa.jsx'
 import Stock from './components/Stock.jsx'
 import Resumen from './components/Resumen.jsx'
