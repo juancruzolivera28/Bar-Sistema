@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { getAll, agregar, actualizar, eliminar } from '../db/database.js'
-import { supabase } from '../supabase'
 
 function Stock({ onVolver }) {
   const [productos, setProductos] = useState([])
