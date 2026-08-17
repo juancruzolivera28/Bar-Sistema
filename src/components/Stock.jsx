@@ -31,28 +31,18 @@ function Stock({ onVolver }) {
       stock: producto.stock.toString(),
       stockMinimo: (producto.stockMinimo || 0).toString()
     })
-  } 
+  }
 
   function abrirNuevo() {
     setNuevoProducto(true)
     setEditando(null)
-    setForm({
-      nombre: '',
-      precio: '',
-      stock: '',
-      stockMinimo: ''
-    })
+    setForm({ nombre: '', precio: '', stock: '', stockMinimo: '' })
   }
 
   function cancelar() {
     setEditando(null)
     setNuevoProducto(false)
-    setForm({
-      nombre: '',
-      precio: '',
-      stock: '',
-      stockMinimo: ''
-    })
+    setForm({ nombre: '', precio: '', stock: '', stockMinimo: '' })
   }
 
   async function guardarEdicion() {
@@ -61,25 +51,13 @@ function Stock({ onVolver }) {
       return
     }
     const producto = productos.find(p => p.id === editando)
-    const productoActualizado = {
+    await actualizar('productos', {
       ...producto,
       nombre: form.nombre,
       precio: parseFloat(form.precio),
       stock: parseInt(form.stock),
       stockMinimo: parseInt(form.stockMinimo) || 0
-    }
-
-    await actualizar('productos', productoActualizado)
-
-    await supabase
-      .from('productos')
-      .update({
-        nombre: productoActualizado.nombre,
-        precio: productoActualizado.precio,
-        stock: productoActualizado.stock,
-        stockMinimo: productoActualizado.stockMinimo
-      })
-      .eq('id', producto.id)
+    })
     cancelar()
     cargarProductos()
   }
@@ -89,26 +67,12 @@ function Stock({ onVolver }) {
       alert('Completá todos los campos.')
       return
     }
-
-    const productoNuevo = {
+    await agregar('productos', {
       nombre: form.nombre,
       precio: parseFloat(form.precio),
       stock: parseInt(form.stock),
       stockMinimo: parseInt(form.stockMinimo) || 0
-    } 
-
-    await agregar('productos', productoNuevo)
-
-    console.log('PRODUCTO NUEVO:', productoNuevo)
-    
-    const { data, error } = await supabase
-      .from('productos')
-      .insert(productoNuevo)
-      .select()
-
-    console.log('INSERT DATA:', data)
-    console.log('INSERT ERROR:', error)
-
+    })
     cancelar()
     cargarProductos()
   }
@@ -117,35 +81,16 @@ function Stock({ onVolver }) {
     const confirmar = window.confirm(`¿Eliminar ${producto.nombre}?`)
     if (!confirmar) return
     await eliminar('productos', producto.id)
-
-    await supabase
-      .from('productos')
-      .delete()
-      .eq('id', producto.id)
     cargarProductos()
   }
 
   function colorStock(producto) {
     if (producto.stock === 0) return '#c0392b'
-
-    if (
-      producto.stockMinimo &&
-      producto.stock <= producto.stockMinimo
-    ) {
-      return '#e07b00'
-    }
-
+    if (producto.stockMinimo && producto.stock <= producto.stockMinimo) return '#e07b00'
     return '#2a9d5c'
   }
 
-  const productosBajoStock = productos.filter(
-      p =>
-        p.stockMinimo &&
-        p.stock <= p.stockMinimo
-  )
-
-
-  
+  const productosBajoStock = productos.filter(p => p.stockMinimo && p.stock <= p.stockMinimo)
 
   const formulario = (
     <div style={{
@@ -181,10 +126,8 @@ function Stock({ onVolver }) {
         placeholder="Stock mínimo"
         type="number"
         value={form.stockMinimo}
-        onChange={(e) =>
-          setForm({ ...form, stockMinimo: e.target.value })
-        }
-          style={estiloInput}
+        onChange={(e) => setForm({ ...form, stockMinimo: e.target.value })}
+        style={estiloInput}
       />
       <div style={{ display: 'flex', gap: '10px' }}>
         <button
@@ -221,10 +164,7 @@ function Stock({ onVolver }) {
     </div>
   )
 
-    
-
   return (
-    
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
@@ -267,16 +207,14 @@ function Stock({ onVolver }) {
       </div>
 
       {productosBajoStock.length > 0 && (
-        <div
-          style={{
-            backgroundColor: '#e07b00',
-            color: 'white',
-            padding: '12px',
-            borderRadius: '10px',
-            marginBottom: '16px',
-            fontWeight: 'bold'
-          }}
-        >
+        <div style={{
+          backgroundColor: '#e07b00',
+          color: 'white',
+          padding: '12px',
+          borderRadius: '10px',
+          marginBottom: '16px',
+          fontWeight: 'bold'
+        }}>
           ⚠ {productosBajoStock.length} productos con stock bajo
         </div>
       )}
@@ -298,14 +236,10 @@ function Stock({ onVolver }) {
                 gap: '10px'
               }}>
                 <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '16px' }}>
-                    {producto.nombre}
-                  </div>
-
+                  <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{producto.nombre}</div>
                   <div style={{ fontSize: '13px', color: '#aaa', marginTop: '2px' }}>
                     ${producto.precio.toLocaleString()}
                   </div>
-
                   <div style={{ fontSize: '12px', color: '#888' }}>
                     Mín: {producto.stockMinimo || 0}
                   </div>
