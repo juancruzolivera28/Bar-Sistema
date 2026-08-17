@@ -127,8 +127,8 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
 
           <div style={{ gridColumn: '1', gridRow: '10' }}><TarjetaMesa mesa={M(11)} ancho={w} alto={h} /></div>
           <div style={{ gridColumn: '2', gridRow: '10' }}><TarjetaMesa mesa={M(12)} ancho={w} alto={h} /></div>
-          <div style={{ gridColumn: '5', gridRow: '9' }}><TarjetaMesa mesa={M(13)} ancho={w} alto={h} /></div>
-          <div style={{ gridColumn: '6', gridRow: '9' }}><TarjetaMesa mesa={M(14)} ancho={w} alto={h} /></div>
+          <div style={{ gridColumn: '5', gridRow: '10' }}><TarjetaMesa mesa={M(13)} ancho={w} alto={h} /></div>
+          <div style={{ gridColumn: '6', gridRow: '10' }}><TarjetaMesa mesa={M(14)} ancho={w} alto={h} /></div>
         </div>
       </div>
 
