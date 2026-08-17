@@ -2,7 +2,11 @@ import { getAll, actualizar, agregar, eliminar } from './db/database.js'
 
 let ws = null
 let reconectarTimer = null
-const IP_SERVIDOR = window.location.hostname
+
+const esLocal = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168')
+const WS_URL = esLocal
+  ? `ws://${window.location.hostname}:4000`
+  : `wss://bar-sistema-production-16af.up.railway.app`
 
 export function iniciarSync(onCambio) {
   conectar(onCambio)
@@ -10,7 +14,7 @@ export function iniciarSync(onCambio) {
 
 function conectar(onCambio) {
   try {
-    ws = new WebSocket(`ws://${IP_SERVIDOR}:4000`)
+    ws = new WebSocket(WS_URL)
 
     ws.onopen = () => {
       console.log('Sync conectado')
@@ -116,3 +120,4 @@ async function aplicarCambio(mensaje) {
       break
   }
 }
+
