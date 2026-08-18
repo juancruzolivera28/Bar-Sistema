@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { getAll, agregar, actualizar, eliminar } from '../db/database.js'
+import { enviarCambio } from '../sync.js'
 
-function Stock({ onVolver }) {
+function Stock({ onVolver, refrescarStock }) {
   const [productos, setProductos] = useState([])
   const [editando, setEditando] = useState(null)
   const [nuevoProducto, setNuevoProducto] = useState(false)
@@ -14,7 +15,7 @@ function Stock({ onVolver }) {
 
   useEffect(() => {
     cargarProductos()
-  }, [])
+  }, [refrescarStock])
 
   async function cargarProductos() {
     const todos = await getAll('productos')
@@ -51,13 +52,15 @@ function Stock({ onVolver }) {
       return
     }
     const producto = productos.find(p => p.id === editando)
-    await actualizar('productos', {
+    const productoActualizado = {
       ...producto,
       nombre: form.nombre,
       precio: parseFloat(form.precio),
       stock: parseInt(form.stock),
       stockMinimo: parseInt(form.stockMinimo) || 0
-    })
+    }
+    await actualizar('productos', productoActualizado)
+    enviarCambio('producto_actualizado', productoActualizado)
     cancelar()
     cargarProductos()
   }
@@ -67,12 +70,14 @@ function Stock({ onVolver }) {
       alert('Completá todos los campos.')
       return
     }
-    await agregar('productos', {
+    const productoNuevo = {
       nombre: form.nombre,
       precio: parseFloat(form.precio),
       stock: parseInt(form.stock),
       stockMinimo: parseInt(form.stockMinimo) || 0
-    })
+    }
+    await agregar('productos', productoNuevo)
+    enviarCambio('producto_agregado', productoNuevo)
     cancelar()
     cargarProductos()
   }
@@ -81,6 +86,7 @@ function Stock({ onVolver }) {
     const confirmar = window.confirm(`¿Eliminar ${producto.nombre}?`)
     if (!confirmar) return
     await eliminar('productos', producto.id)
+    enviarCambio('producto_eliminado', { id: producto.id })
     cargarProductos()
   }
 

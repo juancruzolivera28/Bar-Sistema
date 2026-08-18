@@ -15,6 +15,7 @@ function App() {
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null)
   const [pantalla, setPantalla] = useState('mesas')
   const [rol, setRol] = useState(null)
+  const [refrescarStock, setRefrescarStock] = useState(0)
   const mesasRef = useRef(null)
 
   useEffect(() => {
@@ -29,6 +30,7 @@ function App() {
         if (mesasRef.current) {
           mesasRef.current.recargar()
         }
+        setRefrescarStock(r => r + 1)
       })
     }
   }, [dbReady])
@@ -137,7 +139,10 @@ function App() {
       )}
 
       {pantalla === 'stock' && (
-        <Stock onVolver={() => setPantalla('mesas')} />
+        <Stock
+          onVolver={() => setPantalla('mesas')}
+          refrescarStock={refrescarStock}
+        />
       )}
 
       {pantalla === 'resumen' && (
