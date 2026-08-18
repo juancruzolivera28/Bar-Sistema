@@ -58,11 +58,11 @@ async function aplicarCambio(mensaje) {
   const { tipo, datos } = mensaje
 
   switch (tipo) {
-    case 'mesa_actualizada':
+    case 'mesa_actualizada': {
       await actualizar('mesas', datos)
       break
-
-    case 'pedido_agregado':
+    }
+    case 'pedido_agregado': {
       const pedidos = await getAll('pedidos')
       const existente = pedidos.find(p => p.mesa_id === datos.mesa_id && p.producto_id === datos.producto_id)
       if (existente) {
@@ -72,8 +72,8 @@ async function aplicarCambio(mensaje) {
         await agregar('pedidos', sinId)
       }
       break
-
-    case 'pedido_eliminado':
+    }
+    case 'pedido_eliminado': {
       const todosPedidos = await getAll('pedidos')
       const pedidoLocal = todosPedidos.find(p =>
         p.mesa_id === datos.mesa_id &&
@@ -87,8 +87,8 @@ async function aplicarCambio(mensaje) {
         }
       }
       break
-
-    case 'cuenta_cerrada':
+    }
+    case 'cuenta_cerrada': {
       const pedidosMesa = await getAll('pedidos')
       for (const p of pedidosMesa.filter(p => p.mesa_id === datos.mesa_id)) {
         await eliminar('pedidos', p.id)
@@ -103,21 +103,40 @@ async function aplicarCambio(mensaje) {
       }
       await agregar('historial', datos.historial)
       break
-
-    case 'mesa_extra_agregada':
+    }
+    case 'mesa_extra_agregada': {
       await agregar('mesas', datos)
       break
-
-    case 'mesa_extra_eliminada':
+    }
+    case 'mesa_extra_eliminada': {
       const todasMesas = await getAll('mesas')
       const mesaLocal = todasMesas.find(m => m.numero === datos.numero && m.fija === 0)
       if (mesaLocal) {
         await eliminar('mesas', mesaLocal.id)
       }
       break
-
+    }
+    case 'producto_agregado': {
+      await agregar('productos', datos)
+      break
+    }
+    case 'producto_actualizado': {
+      const todosProductos = await getAll('productos')
+      const productoLocal = todosProductos.find(p => p.nombre === datos.nombre)
+      if (productoLocal) {
+        await actualizar('productos', { ...productoLocal, ...datos })
+      }
+      break
+    }
+    case 'producto_eliminado': {
+      const productosActuales = await getAll('productos')
+      const prod = productosActuales.find(p => p.id === datos.id)
+      if (prod) {
+        await eliminar('productos', prod.id)
+      }
+      break
+    }
     default:
       break
   }
 }
-
