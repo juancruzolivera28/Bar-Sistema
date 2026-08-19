@@ -86,7 +86,7 @@ function Stock({ onVolver, refrescarStock }) {
     const confirmar = window.confirm(`¿Eliminar ${producto.nombre}?`)
     if (!confirmar) return
     await eliminar('productos', producto.id)
-    enviarCambio('producto_eliminado', { id: producto.id })
+    enviarCambio('producto_eliminado', { id: producto.id, nombre: producto.nombre })
     cargarProductos()
   }
 

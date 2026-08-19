@@ -68,7 +68,8 @@ async function aplicarCambio(mensaje) {
       if (existente) {
         await actualizar('pedidos', { ...existente, cantidad: datos.cantidad, timestamp: datos.timestamp })
       } else {
-        const { id, ...sinId } = datos
+        const sinId = { ...datos }
+        delete sinId.id
         await agregar('pedidos', sinId)
       }
       break
@@ -124,13 +125,15 @@ async function aplicarCambio(mensaje) {
       const todosProductos = await getAll('productos')
       const productoLocal = todosProductos.find(p => p.nombre === datos.nombre)
       if (productoLocal) {
-        await actualizar('productos', { ...productoLocal, ...datos })
+        const datosSinId = { ...datos }
+        delete datosSinId.id
+        await actualizar('productos', { ...productoLocal, ...datosSinId })
       }
       break
     }
     case 'producto_eliminado': {
       const productosActuales = await getAll('productos')
-      const prod = productosActuales.find(p => p.id === datos.id)
+      const prod = productosActuales.find(p => p.nombre === datos.nombre)
       if (prod) {
         await eliminar('productos', prod.id)
       }
