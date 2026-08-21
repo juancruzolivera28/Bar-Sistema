@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react'
 import { getAll, getByIndex, agregar, actualizar, eliminar } from '../db/database.js'
 import ModalPago from './ModalPago.jsx'
-import { enviarCambio } from '../sync.js'
+import { iniciarSyncMesa } from '../sync.js'
 
-function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast }) {
+function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   const [pedidos, setPedidos] = useState([])
   const [productos, setProductos] = useState([])
   const [total, setTotal] = useState(0)
   const [mostrarModalPago, setMostrarModalPago] = useState(false)
 
   useEffect(() => {
-    cargarDatos()
+    const detener = iniciarSyncMesa(mesa.id, cargarDatos)
+    return () => detener()
   }, [mesa.id])
+
+  useEffect(() => {
+    cargarDatos()
+  }, [mesa.id, refrescar])
 
   async function cargarDatos() {
     const todosProductos = await getAll('productos')
@@ -53,13 +58,6 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast }) {
 
     await actualizar('mesas', { ...mesa, estado: 'ocupada' })
     onActualizarMesa()
-    enviarCambio('pedido_agregado', {
-      mesa_id: mesa.id,
-      producto_id: producto.id,
-      cantidad: existente ? existente.cantidad + 1 : 1,
-      timestamp: Date.now()
-    })
-    enviarCambio('mesa_actualizada', { ...mesa, estado: 'ocupada' })
     cargarDatos()
   }
 
@@ -73,11 +71,6 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast }) {
     } else {
       await eliminar('pedidos', pedido.id)
     }
-    enviarCambio('pedido_eliminado', {
-      mesa_id: mesa.id,
-      producto_id: pedido.producto_id,
-      cantidad: pedido.cantidad > 1 ? pedido.cantidad - 1 : 0
-    })
     cargarDatos()
   }
 
@@ -111,26 +104,6 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast }) {
 
     await actualizar('mesas', { ...mesa, estado: 'libre' })
 
-    enviarCambio('cuenta_cerrada', {
-      mesa_id: mesa.id,
-      mesa: { ...mesa, estado: 'libre' },
-      detalle: pedidos.map(p => ({
-        nombre: p.nombre,
-        cantidad: p.cantidad,
-        precio: p.precio
-      })),
-      historial: {
-        mesa_id: mesa.id,
-        total,
-        fecha: Date.now(),
-        detalle: pedidos.map(p => ({
-          nombre: p.nombre,
-          cantidad: p.cantidad,
-          precio: p.precio
-        })),
-        metodo_pago: pagos
-      }
-    })
     onToast(`Mesa ${mesa.numero || mesa.nombre} cerrada correctamente`)
     setMostrarModalPago(false)
     onActualizarMesa()

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { initDB } from './db/database.js'
+import { initDB, setOnError } from './db/database.js'
 import Mesas from './components/mesas.jsx'
 import DetalleMesa from './components/DetalleMesa.jsx'
 import Stock from './components/Stock.jsx'
@@ -16,27 +16,59 @@ function App() {
   const [pantalla, setPantalla] = useState('mesas')
   const [rol, setRol] = useState(null)
   const [refrescarStock, setRefrescarStock] = useState(0)
+  const [refrescarGlobal, setRefrescarGlobal] = useState(0)
+  const [enLinea, setEnLinea] = useState(navigator.onLine)
   const mesasRef = useRef(null)
 
+  function refrescarTodo() {
+    if (mesasRef.current) {
+      mesasRef.current.recargar()
+    }
+    setRefrescarStock(r => r + 1)
+    setRefrescarGlobal(r => r + 1)
+  }
+
   useEffect(() => {
+    setOnError((mensaje) => mostrarToast(mensaje, 'error'))
+
     initDB()
       .then(() => setDbReady(true))
       .catch((err) => setError(err.message))
   }, [])
 
   useEffect(() => {
+    function handleOnline() {
+      setEnLinea(true)
+      // Mientras estuvo desconectado puede haber cambios de otros
+      // dispositivos que no llegaron por Realtime: recargamos todo.
+      refrescarTodo()
+    }
+    function handleOffline() { setEnLinea(false) }
+    function handleVisibilidad() {
+      // Al reabrir la app (celular que estaba en segundo plano, pestaña
+      // que se retoma) volvemos a traer el estado real desde Supabase.
+      if (document.visibilityState === 'visible') {
+        refrescarTodo()
+      }
+    }
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    document.addEventListener('visibilitychange', handleVisibilidad)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+      document.removeEventListener('visibilitychange', handleVisibilidad)
+    }
+  }, [])
+
+  useEffect(() => {
     if (dbReady) {
-      iniciarSync(() => {
-        if (mesasRef.current) {
-          mesasRef.current.recargar()
-        }
-        setRefrescarStock(r => r + 1)
-      })
+      iniciarSync(refrescarTodo)
     }
   }, [dbReady])
 
-  function mostrarToast(mensaje) {
-    setToast(mensaje)
+  function mostrarToast(mensaje, tipo = 'success') {
+    setToast({ mensaje, tipo })
     setTimeout(() => setToast(null), 3000)
   }
 
@@ -45,29 +77,37 @@ function App() {
     mesasRef.current.recargar()
   }
 
-  if (!rol) {
-    return <Login onLogin={(r) => setRol(r)} />
-  }
-
-  if (error) {
-    return (
-      <div style={{ padding: '20px', color: 'red' }}>
-        <p>Error al iniciar la base de datos:</p>
-        <p>{error}</p>
-      </div>
-    )
-  }
-
-  if (!dbReady) {
-    return (
-      <div style={{ padding: '20px' }}>
-        <p>Iniciando sistema...</p>
-      </div>
-    )
-  }
-
   return (
-    <div style={{ width: '100%', minHeight: '100vh', padding: 0, backgroundColor: '#0f1117' }}>
+    <>
+      {!enLinea && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0,
+          backgroundColor: '#c0392b',
+          color: 'white',
+          textAlign: 'center',
+          padding: '8px',
+          fontSize: '13px',
+          fontWeight: 'bold',
+          zIndex: 1000
+        }}>
+          Sin conexión a internet — los cambios no se van a guardar hasta reconectar
+        </div>
+      )}
+
+      {!rol ? (
+        <Login onLogin={(r) => setRol(r)} />
+      ) : error ? (
+        <div style={{ padding: '20px', color: 'red' }}>
+          <p>Error al iniciar la base de datos:</p>
+          <p>{error}</p>
+        </div>
+      ) : !dbReady ? (
+        <div style={{ padding: '20px' }}>
+          <p>Iniciando sistema...</p>
+        </div>
+      ) : (
+        <div style={{ width: '100%', minHeight: '100vh', padding: 0, backgroundColor: '#0f1117' }}>
 
       <div style={{
         display: 'flex',
@@ -155,7 +195,11 @@ function App() {
           onVolver={handleVolver}
           onActualizarMesa={() => {}}
           onToast={mostrarToast}
+          refrescar={refrescarGlobal}
         />
+      )}
+
+        </div>
       )}
 
       {toast && (
@@ -164,7 +208,7 @@ function App() {
           bottom: '30px',
           left: '50%',
           transform: 'translateX(-50%)',
-          backgroundColor: '#2a9d5c',
+          backgroundColor: toast.tipo === 'error' ? '#c0392b' : '#2a9d5c',
           color: 'white',
           padding: '14px 28px',
           borderRadius: '12px',
@@ -173,11 +217,10 @@ function App() {
           zIndex: 999,
           boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
         }}>
-          ✓ {toast}
+          {toast.tipo === 'error' ? '⚠' : '✓'} {toast.mensaje}
         </div>
       )}
-
-    </div>
+    </>
   )
 }
 

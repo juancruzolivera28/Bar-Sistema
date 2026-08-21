@@ -1,145 +1,54 @@
-import { getAll, actualizar, agregar, eliminar } from './db/database.js'
+import { supabase } from './db/supabaseClient.js'
 
-let ws = null
-let reconectarTimer = null
-
-const esLocal = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.168')
-const WS_URL = esLocal
-  ? `ws://${window.location.hostname}:4000`
-  : `wss://bar-sistema-production-16af.up.railway.app`
+let canalGlobal = null
 
 export function iniciarSync(onCambio) {
-  conectar(onCambio)
+  if (!supabase || canalGlobal) return canalGlobal
+
+  let conectadoAntes = false
+
+  canalGlobal = supabase
+    .channel('bar-sistema-cambios')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas' }, () => onCambio())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, () => onCambio())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => onCambio())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'historial' }, () => onCambio())
+    .subscribe((status) => {
+      // Si el canal se reconecta después de haber estado caído (wifi cortado,
+      // app en segundo plano, etc.), Realtime NO reenvía lo que pasó mientras
+      // estuvo desconectado. Por eso forzamos una recarga completa apenas
+      // vuelve a quedar "SUBSCRIBED", para no quedarnos con datos viejos.
+      if (status === 'SUBSCRIBED') {
+        if (conectadoAntes) onCambio()
+        conectadoAntes = true
+      }
+    })
+
+  return canalGlobal
 }
 
-function conectar(onCambio) {
-  try {
-    ws = new WebSocket(WS_URL)
-
-    ws.onopen = () => {
-      console.log('Sync conectado')
-      if (reconectarTimer) {
-        clearTimeout(reconectarTimer)
-        reconectarTimer = null
-      }
-    }
-
-    ws.onmessage = async (event) => {
-      try {
-        const mensaje = JSON.parse(event.data)
-        await aplicarCambio(mensaje)
-        onCambio()
-      } catch (err) {
-        console.error('Error procesando mensaje sync:', err)
-      }
-    }
-
-    ws.onclose = () => {
-      console.log('Sync desconectado, reintentando en 3s...')
-      reconectarTimer = setTimeout(() => conectar(onCambio), 3000)
-    }
-
-    ws.onerror = () => {
-      ws.close()
-    }
-  } catch (err) {
-    console.error('Error al conectar sync:', err)
-    reconectarTimer = setTimeout(() => conectar(onCambio), 3000)
+export function detenerSync() {
+  if (canalGlobal) {
+    supabase.removeChannel(canalGlobal)
+    canalGlobal = null
   }
 }
 
-export function enviarCambio(tipo, datos) {
-  if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ tipo, datos, timestamp: Date.now() }))
-  }
-}
+export function iniciarSyncMesa(mesaId, onCambio) {
+  if (!supabase) return () => {}
 
-async function aplicarCambio(mensaje) {
-  const { tipo, datos } = mensaje
+  let conectadoAntes = false
 
-  switch (tipo) {
-    case 'mesa_actualizada': {
-      await actualizar('mesas', datos)
-      break
-    }
-    case 'pedido_agregado': {
-      const pedidos = await getAll('pedidos')
-      const existente = pedidos.find(p => p.mesa_id === datos.mesa_id && p.producto_id === datos.producto_id)
-      if (existente) {
-        await actualizar('pedidos', { ...existente, cantidad: datos.cantidad, timestamp: datos.timestamp })
-      } else {
-        const sinId = { ...datos }
-        delete sinId.id
-        await agregar('pedidos', sinId)
+  const canal = supabase
+    .channel(`mesa-${mesaId}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos', filter: `mesa_id=eq.${mesaId}` }, () => onCambio())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'mesas', filter: `id=eq.${mesaId}` }, () => onCambio())
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        if (conectadoAntes) onCambio()
+        conectadoAntes = true
       }
-      break
-    }
-    case 'pedido_eliminado': {
-      const todosPedidos = await getAll('pedidos')
-      const pedidoLocal = todosPedidos.find(p =>
-        p.mesa_id === datos.mesa_id &&
-        p.producto_id === datos.producto_id
-      )
-      if (pedidoLocal) {
-        if (datos.cantidad > 0) {
-          await actualizar('pedidos', { ...pedidoLocal, cantidad: datos.cantidad })
-        } else {
-          await eliminar('pedidos', pedidoLocal.id)
-        }
-      }
-      break
-    }
-    case 'cuenta_cerrada': {
-      const pedidosMesa = await getAll('pedidos')
-      for (const p of pedidosMesa.filter(p => p.mesa_id === datos.mesa_id)) {
-        await eliminar('pedidos', p.id)
-      }
-      await actualizar('mesas', { ...datos.mesa, estado: 'libre' })
-      const productos = await getAll('productos')
-      for (const item of datos.detalle) {
-        const producto = productos.find(p => p.nombre === item.nombre)
-        if (producto) {
-          await actualizar('productos', { ...producto, stock: producto.stock - item.cantidad })
-        }
-      }
-      await agregar('historial', datos.historial)
-      break
-    }
-    case 'mesa_extra_agregada': {
-      await agregar('mesas', datos)
-      break
-    }
-    case 'mesa_extra_eliminada': {
-      const todasMesas = await getAll('mesas')
-      const mesaLocal = todasMesas.find(m => m.numero === datos.numero && m.fija === 0)
-      if (mesaLocal) {
-        await eliminar('mesas', mesaLocal.id)
-      }
-      break
-    }
-    case 'producto_agregado': {
-      await agregar('productos', datos)
-      break
-    }
-    case 'producto_actualizado': {
-      const todosProductos = await getAll('productos')
-      const productoLocal = todosProductos.find(p => p.nombre === datos.nombre)
-      if (productoLocal) {
-        const datosSinId = { ...datos }
-        delete datosSinId.id
-        await actualizar('productos', { ...productoLocal, ...datosSinId })
-      }
-      break
-    }
-    case 'producto_eliminado': {
-      const productosActuales = await getAll('productos')
-      const prod = productosActuales.find(p => p.nombre === datos.nombre)
-      if (prod) {
-        await eliminar('productos', prod.id)
-      }
-      break
-    }
-    default:
-      break
-  }
+    })
+
+  return () => supabase.removeChannel(canal)
 }

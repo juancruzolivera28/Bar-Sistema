@@ -1,6 +1,5 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { getAll, agregar, eliminar } from '../db/database.js'
-import { enviarCambio } from '../sync.js'
 
 const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
   const [mesas, setMesas] = useState([])
@@ -41,7 +40,6 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
   async function agregarMesaExtra() {
     const ultimoNumero = mesas.length > 0 ? Math.max(...mesas.map(m => m.numero)) : 25
     await agregar('mesas', { numero: ultimoNumero + 1, estado: 'libre', nombre: null, fija: 0 })
-    enviarCambio('mesa_extra_agregada', { numero: ultimoNumero + 1, estado: 'libre', nombre: null, fija: 0 })
     cargarMesas()
   }
 
@@ -53,7 +51,6 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
     const confirmar = window.confirm(`¿Eliminar Mesa ${mesa.numero}?`)
     if (!confirmar) return
     await eliminar('mesas', mesa.id)
-    enviarCambio('mesa_extra_eliminada', { numero: mesa.numero })
     cargarMesas()
   }
 

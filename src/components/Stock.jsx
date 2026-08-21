@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { getAll, agregar, actualizar, eliminar } from '../db/database.js'
-import { enviarCambio } from '../sync.js'
 
 function Stock({ onVolver, refrescarStock }) {
   const [productos, setProductos] = useState([])
@@ -60,7 +59,6 @@ function Stock({ onVolver, refrescarStock }) {
       stockMinimo: parseInt(form.stockMinimo) || 0
     }
     await actualizar('productos', productoActualizado)
-    enviarCambio('producto_actualizado', productoActualizado)
     cancelar()
     cargarProductos()
   }
@@ -77,7 +75,6 @@ function Stock({ onVolver, refrescarStock }) {
       stockMinimo: parseInt(form.stockMinimo) || 0
     }
     await agregar('productos', productoNuevo)
-    enviarCambio('producto_agregado', productoNuevo)
     cancelar()
     cargarProductos()
   }
@@ -86,7 +83,6 @@ function Stock({ onVolver, refrescarStock }) {
     const confirmar = window.confirm(`¿Eliminar ${producto.nombre}?`)
     if (!confirmar) return
     await eliminar('productos', producto.id)
-    enviarCambio('producto_eliminado', { id: producto.id, nombre: producto.nombre })
     cargarProductos()
   }
 
