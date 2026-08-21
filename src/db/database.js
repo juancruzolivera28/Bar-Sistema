@@ -16,8 +16,9 @@ export function setOnError(handler) {
 
 function manejarError(accion, error) {
   console.error(`Error en ${accion}:`, error)
+  const detalle = error?.message ? ` (${error.message})` : ''
   const mensaje = navigator.onLine
-    ? 'No se pudo conectar con el servidor. Intentá de nuevo.'
+    ? `No se pudo conectar con el servidor.${detalle} Intentá de nuevo.`
     : 'Sin conexión a internet. Los cambios no se guardaron.'
   if (onError) onError(mensaje)
   throw error
