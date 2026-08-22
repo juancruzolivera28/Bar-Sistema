@@ -63,9 +63,12 @@ export async function agregar(storeName, data) {
 
 export async function actualizar(storeName, data) {
   const clave = CLAVES_PRIMARIAS[storeName] || 'id'
-  const { error } = await supabase.from(storeName).update(data).eq(clave, data[clave])
+  const valorClave = data[clave]
+  const resto = { ...data }
+  delete resto[clave]
+  const { error } = await supabase.from(storeName).update(resto).eq(clave, valorClave)
   if (error) manejarError(`actualizar ${storeName}`, error)
-  return data[clave]
+  return valorClave
 }
 
 export async function eliminar(storeName, key) {
