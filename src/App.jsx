@@ -72,7 +72,7 @@ function App() {
     // Red de seguridad: Realtime avisa los cambios al toque, pero si por lo
     // que sea (wifi rara, service worker viejo, etc.) un dispositivo no
     // recibe el evento, este intervalo lo termina poniendo al día solo.
-    const intervalo = setInterval(refrescarTodo, 15000)
+    const intervalo = setInterval(refrescarTodo, 5000)
     return () => clearInterval(intervalo)
   }, [dbReady])
 
