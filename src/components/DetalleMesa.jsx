@@ -64,7 +64,9 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   async function quitarProducto(pedido) {
     if (pedido.cantidad > 1) {
       await actualizar('pedidos', {
-        ...pedido,
+        id: pedido.id,
+        mesa_id: pedido.mesa_id,
+        producto_id: pedido.producto_id,
         cantidad: pedido.cantidad - 1,
         timestamp: Date.now()
       })
