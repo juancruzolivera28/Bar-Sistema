@@ -122,10 +122,17 @@ from (values
   ('Agua', 800, 20, 4),
   ('Cerveza', 2000, 30, 8),
   ('Fernet', 2500, 15, 3),
-  ('Papas fritas', 1800, 10, 2)
+  ('Papas fritas', 1800, 10, 2),
+  ('Pizza', 8000, 10, 2),
+  ('Quilmes', 2200, 30, 8),
+  ('Brahma', 2200, 30, 8),
+  ('1890', 2800, 24, 6),
+  ('Hamburguesa', 6500, 12, 3),
+  ('Maní', 1200, 20, 5),
+  ('Empanadas', 1200, 24, 6)
 ) as v(nombre, precio, stock, "stockMinimo")
 where not exists (select 1 from productos);
 
 insert into configuracion (clave, valor)
-values ('pin_dueno', '1234')
+values ('pin_dueno', '2162')
 on conflict (clave) do nothing;
