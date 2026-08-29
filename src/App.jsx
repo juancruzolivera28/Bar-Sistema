@@ -4,6 +4,7 @@ import Mesas from './components/mesas.jsx'
 import DetalleMesa from './components/DetalleMesa.jsx'
 import Stock from './components/Stock.jsx'
 import Resumen from './components/Resumen.jsx'
+import Dashboard from './components/Dashboard.jsx'
 import Login from './components/Login.jsx'
 import { iniciarSync } from './sync.js'
 import './App.css'
@@ -176,6 +177,22 @@ function App() {
               Stock
             </button>
           )}
+          {rol === 'dueno' && (
+            <button
+              onClick={() => setPantalla('dashboard')}
+              style={{
+                backgroundColor: pantalla === 'dashboard' ? '#1a73e8' : '#333',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 14px',
+                fontSize: '14px',
+                cursor: 'pointer'
+              }}
+            >
+              Dashboard
+            </button>
+          )}
         </div>
       </div>
 
@@ -196,6 +213,13 @@ function App() {
 
       {pantalla === 'resumen' && (
         <Resumen onVolver={() => setPantalla('mesas')} />
+      )}
+
+      {pantalla === 'dashboard' && (
+        <Dashboard
+          onVolver={() => setPantalla('mesas')}
+          refrescar={refrescarGlobal}
+        />
       )}
 
       {mesaSeleccionada && (

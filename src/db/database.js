@@ -5,6 +5,7 @@ const CLAVES_PRIMARIAS = {
   productos: 'id',
   pedidos: 'id',
   historial: 'id',
+  gastos: 'id',
   configuracion: 'clave'
 }
 

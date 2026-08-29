@@ -43,8 +43,17 @@ create table if not exists configuracion (
   valor text
 );
 
+create table if not exists gastos (
+  id bigint generated always as identity primary key,
+  descripcion text not null,
+  monto numeric not null,
+  fecha bigint not null,
+  categoria text not null
+);
+
 create index if not exists idx_pedidos_mesa_id on pedidos(mesa_id);
 create index if not exists idx_historial_fecha on historial(fecha);
+create index if not exists idx_gastos_fecha on gastos(fecha);
 
 -- ==========================================================
 -- Row Level Security
@@ -58,6 +67,7 @@ alter table mesas enable row level security;
 alter table productos enable row level security;
 alter table pedidos enable row level security;
 alter table historial enable row level security;
+alter table gastos enable row level security;
 alter table configuracion enable row level security;
 
 drop policy if exists "anon acceso total" on mesas;
@@ -72,6 +82,9 @@ create policy "anon acceso total" on pedidos for all using (true) with check (tr
 drop policy if exists "anon acceso total" on historial;
 create policy "anon acceso total" on historial for all using (true) with check (true);
 
+drop policy if exists "anon acceso total" on gastos;
+create policy "anon acceso total" on gastos for all using (true) with check (true);
+
 drop policy if exists "anon acceso total" on configuracion;
 create policy "anon acceso total" on configuracion for all using (true) with check (true);
 
@@ -84,6 +97,7 @@ alter publication supabase_realtime add table mesas;
 alter publication supabase_realtime add table productos;
 alter publication supabase_realtime add table pedidos;
 alter publication supabase_realtime add table historial;
+alter publication supabase_realtime add table gastos;
 
 -- ==========================================================
 -- Datos iniciales (equivalentes a insertarDatosInicialesSeNecesario)

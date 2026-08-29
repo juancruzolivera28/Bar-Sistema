@@ -13,6 +13,7 @@ export function iniciarSync(onCambio) {
     .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, () => onCambio())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => onCambio())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'historial' }, () => onCambio())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'gastos' }, () => onCambio())
     .subscribe((status) => {
       // Si el canal se reconecta después de haber estado caído (wifi cortado,
       // app en segundo plano, etc.), Realtime NO reenvía lo que pasó mientras
