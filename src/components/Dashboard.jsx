@@ -84,13 +84,14 @@ function Dashboard({ onVolver, refrescar }) {
   }
 
   async function guardarGasto() {
-    if (!form.descripcion || !form.monto) {
-      alert('Completá descripción y monto.')
+    const monto = parseFloat(form.monto)
+    if (!form.descripcion.trim() || !form.fecha || isNaN(monto) || monto <= 0) {
+      alert('Completá descripción, un monto mayor a 0 y una fecha.')
       return
     }
     const gastoNuevo = {
-      descripcion: form.descripcion,
-      monto: parseFloat(form.monto),
+      descripcion: form.descripcion.trim(),
+      monto,
       categoria: form.categoria,
       fecha: new Date(`${form.fecha}T12:00:00`).getTime()
     }
@@ -110,8 +111,9 @@ function Dashboard({ onVolver, refrescar }) {
   const totalGastado = gastos.reduce((s, g) => s + g.monto, 0)
   const neta = totalGanado - totalGastado
 
-  const nombreMes = new Date(anio, mes, 1)
+  const nombreMesRaw = new Date(anio, mes, 1)
     .toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
+  const nombreMes = nombreMesRaw.charAt(0).toUpperCase() + nombreMesRaw.slice(1)
 
   function fechaCorta(ms) {
     return new Date(ms).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
@@ -256,7 +258,6 @@ function Dashboard({ onVolver, refrescar }) {
         <span style={{
           fontSize: '17px',
           fontWeight: 'bold',
-          textTransform: 'capitalize',
           minWidth: '160px',
           textAlign: 'center'
         }}>
