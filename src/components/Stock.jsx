@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getAll, agregar, actualizar, eliminar } from '../db/database.js'
 
-function Stock({ onVolver, refrescarStock }) {
+function Stock({ refrescarStock }) {
   const [productos, setProductos] = useState([])
   const [editando, setEditando] = useState(null)
   const [nuevoProducto, setNuevoProducto] = useState(false)
@@ -173,23 +173,10 @@ function Stock({ onVolver, refrescarStock }) {
       backgroundColor: '#111',
       color: 'white',
       overflowY: 'auto',
-      padding: '16px'
+      padding: '16px',
+      paddingBottom: '80px'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
-        <button
-          onClick={onVolver}
-          style={{
-            background: 'none',
-            border: '1px solid #444',
-            color: 'white',
-            borderRadius: '8px',
-            padding: '8px 14px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          ← Volver
-        </button>
         <h2 style={{ margin: 0 }}>Stock</h2>
         <button
           onClick={abrirNuevo}

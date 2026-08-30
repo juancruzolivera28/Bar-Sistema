@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getAll } from '../db/database.js'
 
-function Resumen({ onVolver }) {
+function Resumen() {
   const [datos, setDatos] = useState(null)
 
   function calcularTurno() {
@@ -91,23 +91,10 @@ function Resumen({ onVolver }) {
       backgroundColor: '#111',
       color: 'white',
       overflowY: 'auto',
-      padding: '16px'
+      padding: '16px',
+      paddingBottom: '80px'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
-        <button
-          onClick={onVolver}
-          style={{
-            background: 'none',
-            border: '1px solid #444',
-            color: 'white',
-            borderRadius: '8px',
-            padding: '8px 14px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          ← Volver
-        </button>
         <h2 style={{ margin: 0 }}>Resumen del día</h2>
 
         <div

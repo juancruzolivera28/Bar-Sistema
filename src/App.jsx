@@ -6,6 +6,8 @@ import Stock from './components/Stock.jsx'
 import Resumen from './components/Resumen.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import Login from './components/Login.jsx'
+import BottomNav from './components/BottomNav.jsx'
+import { ALTO_BOTTOM_NAV } from './components/bottomNavConfig.js'
 import { iniciarSync } from './sync.js'
 import './App.css'
 
@@ -14,8 +16,20 @@ function App() {
   const [dbReady, setDbReady] = useState(false)
   const [error, setError] = useState(null)
   const [mesaSeleccionada, setMesaSeleccionada] = useState(null)
+  // Pantalla inicial real se define en handleLogin segun el rol.
   const [pantalla, setPantalla] = useState('mesas')
   const [rol, setRol] = useState(null)
+
+  // La pantalla que ve cada rol apenas se loguea.
+  // dueno -> Dashboard financiero, mozo -> Mesas.
+  function pantallaInicial(rolLogueado) {
+    return rolLogueado === 'dueno' ? 'dashboard' : 'mesas'
+  }
+
+  function handleLogin(rolLogueado) {
+    setRol(rolLogueado)
+    setPantalla(pantallaInicial(rolLogueado))
+  }
   const [refrescarStock, setRefrescarStock] = useState(0)
   const [refrescarGlobal, setRefrescarGlobal] = useState(0)
   const [enLinea, setEnLinea] = useState(navigator.onLine)
@@ -106,7 +120,7 @@ function App() {
       )}
 
       {!rol ? (
-        <Login onLogin={(r) => setRol(r)} />
+        <Login onLogin={handleLogin} />
       ) : error ? (
         <div style={{ padding: '20px', color: 'red' }}>
           <p>Error al iniciar la base de datos:</p>
@@ -117,83 +131,24 @@ function App() {
           <p>Iniciando sistema...</p>
         </div>
       ) : (
-        <div style={{ width: '100%', minHeight: '100vh', padding: 0, backgroundColor: '#0f1117' }}>
+        <div style={{
+          width: '100%',
+          minHeight: '100vh',
+          padding: 0,
+          paddingBottom: `${ALTO_BOTTOM_NAV + 16}px`,
+          backgroundColor: '#0f1117'
+        }}>
 
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
         padding: '10px 16px',
         backgroundColor: '#1e1e1e',
-        borderBottom: '1px solid #333',
-        flexWrap: 'wrap',
-        gap: '8px'
+        borderBottom: '1px solid #333'
       }}>
         <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>
           Vuelos Bar
         </span>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setPantalla('resumen')}
-            style={{
-              backgroundColor: pantalla === 'resumen' ? '#1a73e8' : '#333',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px 14px',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}
-          >
-            Resumen
-          </button>
-          <button
-            onClick={() => setPantalla('mesas')}
-            style={{
-              backgroundColor: pantalla === 'mesas' ? '#1a73e8' : '#333',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px 14px',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}
-          >
-            Mesas
-          </button>
-          {rol === 'dueno' && (
-            <button
-              onClick={() => setPantalla('stock')}
-              style={{
-                backgroundColor: pantalla === 'stock' ? '#1a73e8' : '#333',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '8px 14px',
-                fontSize: '14px',
-                cursor: 'pointer'
-              }}
-            >
-              Stock
-            </button>
-          )}
-          {rol === 'dueno' && (
-            <button
-              onClick={() => setPantalla('dashboard')}
-              style={{
-                backgroundColor: pantalla === 'dashboard' ? '#1a73e8' : '#333',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                padding: '8px 14px',
-                fontSize: '14px',
-                cursor: 'pointer'
-              }}
-            >
-              Dashboard
-            </button>
-          )}
-        </div>
       </div>
 
       {pantalla === 'mesas' && (
@@ -205,21 +160,15 @@ function App() {
       )}
 
       {pantalla === 'stock' && (
-        <Stock
-          onVolver={() => setPantalla('mesas')}
-          refrescarStock={refrescarStock}
-        />
+        <Stock refrescarStock={refrescarStock} />
       )}
 
       {pantalla === 'resumen' && (
-        <Resumen onVolver={() => setPantalla('mesas')} />
+        <Resumen />
       )}
 
       {pantalla === 'dashboard' && (
-        <Dashboard
-          onVolver={() => setPantalla('mesas')}
-          refrescar={refrescarGlobal}
-        />
+        <Dashboard refrescar={refrescarGlobal} />
       )}
 
       {mesaSeleccionada && (
@@ -229,6 +178,16 @@ function App() {
           onActualizarMesa={() => {}}
           onToast={mostrarToast}
           refrescar={refrescarGlobal}
+        />
+      )}
+
+      {/* DetalleMesa es un overlay a pantalla completa con su propio boton
+          Volver, asi que ocultamos la barra mientras hay una mesa abierta. */}
+      {!mesaSeleccionada && (
+        <BottomNav
+          rol={rol}
+          pantalla={pantalla}
+          onCambiarPantalla={setPantalla}
         />
       )}
 

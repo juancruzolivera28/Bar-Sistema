@@ -10,7 +10,7 @@ function fechaISOHoy() {
   return `${d.getFullYear()}-${mm}-${dd}`
 }
 
-function Dashboard({ onVolver, refrescar }) {
+function Dashboard({ refrescar }) {
   const hoy = new Date()
   const [mes, setMes] = useState(hoy.getMonth())
   const [anio, setAnio] = useState(hoy.getFullYear())
@@ -199,23 +199,10 @@ function Dashboard({ onVolver, refrescar }) {
       backgroundColor: '#111',
       color: 'white',
       overflowY: 'auto',
-      padding: '16px'
+      padding: '16px',
+      paddingBottom: '80px'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
-        <button
-          onClick={onVolver}
-          style={{
-            background: 'none',
-            border: '1px solid #444',
-            color: 'white',
-            borderRadius: '8px',
-            padding: '8px 14px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }}
-        >
-          ← Volver
-        </button>
         <h2 style={{ margin: 0 }}>Dashboard</h2>
         <button
           onClick={abrirNuevo}

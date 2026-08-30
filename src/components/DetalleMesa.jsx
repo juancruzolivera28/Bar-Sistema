@@ -6,8 +6,14 @@ import { iniciarSyncMesa } from '../sync.js'
 function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   const [pedidos, setPedidos] = useState([])
   const [productos, setProductos] = useState([])
-  const [total, setTotal] = useState(0)
   const [mostrarModalPago, setMostrarModalPago] = useState(false)
+
+  // Total derivado de pedidos: asi siempre coincide con lo que se ve en la
+  // lista. Antes era un useState que seteaba cargarDatos, pero en cada alta
+  // se disparan varias cargarDatos en paralelo (realtime de pedidos, realtime
+  // de mesas, refresco global cada 5s y la llamada explicita). Si una leia la
+  // mesa antes de que el INSERT fuera visible, terminaba pisando el total con 0.
+  const total = pedidos.reduce((acc, p) => acc + (Number(p.precio) || 0) * p.cantidad, 0)
 
   useEffect(() => {
     const detener = iniciarSyncMesa(mesa.id, cargarDatos)
@@ -29,7 +35,6 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
       return { ...p, nombre: producto?.nombre, precio: producto?.precio }
     }))
     setPedidos(pedidosConNombre)
-    setTotal(pedidosConNombre.reduce((acc, p) => acc + (p.precio || 0) * p.cantidad, 0))
   }
 
   async function agregarProducto(producto) {
