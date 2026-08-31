@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { initDB, setOnError, setRestauranteId as fijarRestauranteActivo } from './db/database.js'
 import { supabase } from './db/supabaseClient.js'
 import Mesas from './components/mesas.jsx'
+import MesasGenerico from './components/MesasGenerico.jsx'
 import DetalleMesa from './components/DetalleMesa.jsx'
 import Stock from './components/Stock.jsx'
 import Resumen from './components/Resumen.jsx'
@@ -13,6 +14,14 @@ import { iniciarSync, detenerSync } from './sync.js'
 import './App.css'
 
 const LS_RESTAURANTE = 'bar_sistema_restaurante_id'
+
+// Caso hardcodeado TEMPORAL: Vuelos Bar tiene un plano fisico a medida
+// (src/components/mesas.jsx). Cualquier otro restaurante usa el grid generico
+// (src/components/MesasGenerico.jsx). Cuando exista un editor de layout
+// configurable por restaurante, esto se reemplaza por ese sistema.
+// IMPORTANTE: verificar que este uuid sea el restaurantes.id real de Vuelos
+// Bar en la base:  select id from restaurantes where nombre = 'Vuelos Bar';
+const RESTAURANTE_ID_VUELOS_BAR = '6b6a9ff9-4a10-4e95-9474-c6feb6a5307f'
 
 function App() {
   const [toast, setToast] = useState(null)
@@ -183,6 +192,11 @@ function App() {
     }
   }
 
+  // Vuelos Bar usa su plano fijo a medida; el resto, el grid generico.
+  // Ambos son forwardRef con la misma interfaz (props + ref.recargar()),
+  // asi que son intercambiables sin tocar nada mas de App.jsx.
+  const ComponenteMesas = restauranteId === RESTAURANTE_ID_VUELOS_BAR ? Mesas : MesasGenerico
+
   return (
     <>
       {!enLinea && (
@@ -256,7 +270,7 @@ function App() {
       </div>
 
       {pantalla === 'mesas' && (
-        <Mesas
+        <ComponenteMesas
           ref={mesasRef}
           key={mesaSeleccionada ? 'con-mesa' : 'sin-mesa'}
           onSeleccionarMesa={(mesa) => setMesaSeleccionada(mesa)}
