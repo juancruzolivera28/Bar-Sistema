@@ -97,8 +97,10 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
     for (const p of pedidos) {
       const producto = productos.find(pr => pr.id === p.producto_id)
       if (producto) {
+        // Payload minimo (solo id + stock): el mozo tiene permiso de UPDATE
+        // acotado a la columna stock de productos (ver migracion_multitenant.sql).
         await actualizar('productos', {
-          ...producto,
+          id: producto.id,
           stock: producto.stock - p.cantidad
         })
       }
