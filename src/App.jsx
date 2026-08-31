@@ -8,6 +8,7 @@ import Stock from './components/Stock.jsx'
 import Resumen from './components/Resumen.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import Login from './components/Login.jsx'
+import CodigoAcceso from './components/CodigoAcceso.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import { ALTO_BOTTOM_NAV } from './components/bottomNavConfig.js'
 import { iniciarSync, detenerSync } from './sync.js'
@@ -287,6 +288,10 @@ function App() {
 
       {pantalla === 'dashboard' && (
         <Dashboard refrescar={refrescarGlobal} />
+      )}
+
+      {pantalla === 'codigo' && (
+        <CodigoAcceso restauranteId={restauranteId} />
       )}
 
       {mesaSeleccionada && (

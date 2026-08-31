@@ -1,4 +1,4 @@
-import { DollarSign, LayoutGrid, Package, ClipboardList } from 'lucide-react'
+import { DollarSign, LayoutGrid, Package, ClipboardList, KeyRound } from 'lucide-react'
 
 // Configuracion de la barra de navegacion inferior (BottomNav).
 // Cada item: { ruta, label, icono, roles }
@@ -11,10 +11,11 @@ import { DollarSign, LayoutGrid, Package, ClipboardList } from 'lucide-react'
 //
 // El orden del array es el orden en que aparecen los botones.
 export const NAV_ITEMS = [
-  { ruta: 'dashboard', label: 'Dashboard', icono: DollarSign, roles: ['dueno'] },
-  { ruta: 'mesas',     label: 'Mesas',     icono: LayoutGrid,      roles: ['dueno', 'mozo'] },
-  { ruta: 'stock',     label: 'Stock',     icono: Package,         roles: ['dueno'] },
-  { ruta: 'resumen',   label: 'Resumen',   icono: ClipboardList,   roles: ['dueno', 'mozo'] },
+  { ruta: 'dashboard', label: 'Dashboard', icono: DollarSign,    roles: ['dueno'] },
+  { ruta: 'mesas',     label: 'Mesas',     icono: LayoutGrid,    roles: ['dueno', 'mozo'] },
+  { ruta: 'stock',     label: 'Stock',     icono: Package,       roles: ['dueno'] },
+  { ruta: 'resumen',   label: 'Resumen',   icono: ClipboardList, roles: ['dueno', 'mozo'] },
+  { ruta: 'codigo',    label: 'Código de acceso', icono: KeyRound, roles: ['dueno'] },
 ]
 
 export const COLOR_ACTIVO = '#1a73e8'
