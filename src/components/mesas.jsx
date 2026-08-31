@@ -90,7 +90,21 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
   const h = '52px'
 
   return (
-    <div style={{ padding: '16px', overflow: 'auto', display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+    // El plano de Vuelos Bar tiene ancho fijo (~384px). En celulares chicos
+    // eso superaba el ancho del viewport y el navegador aplicaba zoom-out
+    // automatico a TODA la app. Ahora el plano vive en un contenedor con
+    // scroll horizontal: en PC/tablet queda centrado e identico; en celular
+    // se puede desplazar de lado sin forzar el zoom.
+    <div style={{ padding: '16px', overflowX: 'auto' }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '12px',
+        width: 'min-content',
+        minWidth: '100%',
+        margin: '0 auto'
+      }}>
       <div>
         <div style={{
           display: 'grid',
@@ -196,6 +210,7 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   )

@@ -200,7 +200,7 @@ function Dashboard({ refrescar }) {
       color: '#1a1a1a',
       overflowY: 'auto',
       padding: '16px',
-      paddingBottom: '80px'
+      paddingBottom: 'calc(80px + env(safe-area-inset-bottom))'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
         <h2 style={{ margin: 0 }}>Dashboard</h2>

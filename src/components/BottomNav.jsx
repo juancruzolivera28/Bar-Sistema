@@ -10,7 +10,10 @@ export default function BottomNav({ rol, pantalla, onCambiarPantalla }) {
         left: 0,
         right: 0,
         bottom: 0,
-        height: `${ALTO_BOTTOM_NAV}px`,
+        // Alto real = fila de iconos (64px) + zona segura del SO (home bar /
+        // barra de gestos). Con box-sizing:border-box el paddingBottom no le
+        // come alto a los iconos: quedan siempre en sus 64px.
+        height: `calc(${ALTO_BOTTOM_NAV}px + env(safe-area-inset-bottom))`,
         display: 'flex',
         alignItems: 'stretch',
         justifyContent: 'space-around',

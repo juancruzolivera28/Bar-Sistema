@@ -239,7 +239,8 @@ function App() {
           width: '100%',
           minHeight: '100vh',
           padding: 0,
-          paddingBottom: `${ALTO_BOTTOM_NAV + 16}px`,
+          // Reserva para el BottomNav fijo + zona segura del SO.
+          paddingBottom: `calc(${ALTO_BOTTOM_NAV + 16}px + env(safe-area-inset-bottom))`,
           backgroundColor: '#ffffff'
         }}>
 
