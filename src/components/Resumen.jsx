@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { getAll } from '../db/database.js'
+import { supabase } from '../db/supabaseClient.js'
+import { getRestauranteId } from '../db/database.js'
 
 function Resumen() {
   const [datos, setDatos] = useState(null)
@@ -21,60 +22,50 @@ function Resumen() {
     return { inicio: inicioTurno.getTime(), fin: finTurno.getTime() }
   }
 
+  const RESUMEN_VACIO = {
+    cuentas: [],
+    totales: { efectivo: 0, transferencia: 0, tarjeta: 0 },
+    totalGeneral: 0,
+    productos: {},
+    cantidadMesas: 0,
+    ticketPromedio: 0,
+    productoMasVendido: '-'
+  }
+
   async function cargarResumen() {
     const { inicio, fin } = calcularTurno()
-    const todoHistorial = await getAll('historial')
 
-    const cuentas = todoHistorial
-      .filter(h => h.fecha >= inicio && h.fecha < fin)
-      .sort((a, b) => b.fecha - a.fecha)
-      .map(h => ({
-        ...h,
-        fechaHora: new Date(h.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-      }))
-
-    const totales = { efectivo: 0, transferencia: 0, tarjeta: 0 }
-    let totalGeneral = 0
-
-    cuentas.forEach(cuenta => {
-      totalGeneral += cuenta.total
-      cuenta.metodo_pago.forEach(pago => {
-        if (totales[pago.metodo] !== undefined) {
-          totales[pago.metodo] += (pago.monto || 0)
-        }
-      })
+    // Antes esto hacia getAll('historial') y agregaba en el cliente. Ahora
+    // historial no es legible con la anon key: el resumen del turno lo calcula
+    // la RPC resumen_turno del lado del servidor, acotada a este restaurante y
+    // a la ventana del turno. Se renderiza exactamente lo mismo que antes.
+    const { data, error } = await supabase.rpc('resumen_turno', {
+      p_restaurante_id: getRestauranteId(),
+      p_desde: inicio,
+      p_hasta: fin
     })
 
-    const productos = {}
-    cuentas.forEach(cuenta => {
-      cuenta.detalle.forEach(item => {
-        if (productos[item.nombre]) {
-          productos[item.nombre] += item.cantidad
-        } else {
-          productos[item.nombre] = item.cantidad
-        }
-      })
-    })
+    if (error || !data) {
+      console.error('resumen_turno:', error)
+      setDatos(RESUMEN_VACIO)
+      return
+    }
 
-    const cantidadMesas = cuentas.length
-
-    const ticketPromedio =
-      cantidadMesas > 0
-        ? Math.round(totalGeneral / cantidadMesas)
-        : 0
-
-    const productoMasVendido =
-      Object.entries(productos)
-        .sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
+    // La RPC devuelve cada cuenta con fecha (epoch ms); el formato de hora
+    // (locale es-AR) se arma en el cliente, igual que antes.
+    const cuentas = (data.cuentas || []).map(c => ({
+      ...c,
+      fechaHora: new Date(c.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+    }))
 
     setDatos({
       cuentas,
-      totales,
-      totalGeneral,
-      productos,
-      cantidadMesas,
-      ticketPromedio,
-      productoMasVendido
+      totales: data.totales || RESUMEN_VACIO.totales,
+      totalGeneral: data.totalGeneral || 0,
+      productos: data.productos || {},
+      cantidadMesas: data.cantidadMesas || 0,
+      ticketPromedio: data.ticketPromedio || 0,
+      productoMasVendido: data.productoMasVendido || '-'
     })
   }
 
