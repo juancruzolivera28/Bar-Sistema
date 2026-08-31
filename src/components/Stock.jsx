@@ -96,7 +96,8 @@ function Stock({ refrescarStock }) {
 
   const formulario = (
     <div style={{
-      backgroundColor: '#1e1e1e',
+      backgroundColor: '#f4f4f5',
+      border: '1px solid #e0e0e0',
       borderRadius: '12px',
       padding: '16px',
       marginBottom: '16px',
@@ -151,8 +152,8 @@ function Stock({ refrescarStock }) {
           onClick={cancelar}
           style={{
             flex: 1,
-            backgroundColor: '#333',
-            color: 'white',
+            backgroundColor: '#e0e0e0',
+            color: '#1a1a1a',
             border: 'none',
             borderRadius: '8px',
             padding: '12px',
@@ -170,8 +171,8 @@ function Stock({ refrescarStock }) {
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: '#111',
-      color: 'white',
+      backgroundColor: '#ffffff',
+      color: '#1a1a1a',
       overflowY: 'auto',
       padding: '16px',
       paddingBottom: '80px'
@@ -215,7 +216,8 @@ function Stock({ refrescarStock }) {
           <div key={producto.id}>
             {editando === producto.id ? formulario : (
               <div style={{
-                backgroundColor: '#1e1e1e',
+                backgroundColor: '#f4f4f5',
+                border: '1px solid #e0e0e0',
                 borderRadius: '12px',
                 padding: '14px 16px',
                 display: 'flex',
@@ -226,16 +228,17 @@ function Stock({ refrescarStock }) {
               }}>
                 <div>
                   <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{producto.nombre}</div>
-                  <div style={{ fontSize: '13px', color: '#aaa', marginTop: '2px' }}>
+                  <div style={{ fontSize: '13px', color: '#666', marginTop: '2px' }}>
                     ${producto.precio.toLocaleString()}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#888' }}>
+                  <div style={{ fontSize: '12px', color: '#666' }}>
                     Mín: {producto.stockMinimo || 0}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{
                     backgroundColor: colorStock(producto),
+                    color: 'white',
                     borderRadius: '20px',
                     padding: '4px 12px',
                     fontSize: '13px',
@@ -246,9 +249,9 @@ function Stock({ refrescarStock }) {
                   <button
                     onClick={() => abrirEdicion(producto)}
                     style={{
-                      background: '#333',
+                      background: '#e0e0e0',
                       border: 'none',
-                      color: 'white',
+                      color: '#1a1a1a',
                       borderRadius: '6px',
                       padding: '6px 12px',
                       cursor: 'pointer',
@@ -282,12 +285,12 @@ function Stock({ refrescarStock }) {
 }
 
 const estiloInput = {
-  backgroundColor: '#2a2a2a',
-  border: '1px solid #444',
+  backgroundColor: '#ffffff',
+  border: '1px solid #ccc',
   borderRadius: '8px',
   padding: '12px',
   fontSize: '15px',
-  color: 'white',
+  color: '#1a1a1a',
   width: '100%',
   boxSizing: 'border-box'
 }

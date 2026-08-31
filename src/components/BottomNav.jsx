@@ -14,8 +14,8 @@ export default function BottomNav({ rol, pantalla, onCambiarPantalla }) {
         display: 'flex',
         alignItems: 'stretch',
         justifyContent: 'space-around',
-        backgroundColor: '#1e1e1e',
-        borderTop: '1px solid #333',
+        backgroundColor: '#ffffff',
+        borderTop: '1px solid #e0e0e0',
         zIndex: 900,
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}

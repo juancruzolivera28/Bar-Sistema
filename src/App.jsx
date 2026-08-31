@@ -136,17 +136,17 @@ function App() {
           minHeight: '100vh',
           padding: 0,
           paddingBottom: `${ALTO_BOTTOM_NAV + 16}px`,
-          backgroundColor: '#0f1117'
+          backgroundColor: '#ffffff'
         }}>
 
       <div style={{
         display: 'flex',
         alignItems: 'center',
         padding: '10px 16px',
-        backgroundColor: '#1e1e1e',
-        borderBottom: '1px solid #333'
+        backgroundColor: '#ffffff',
+        borderBottom: '1px solid #e0e0e0'
       }}>
-        <span style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>
+        <span style={{ color: '#1a1a1a', fontWeight: 'bold', fontSize: '18px' }}>
           Vuelos Bar
         </span>
       </div>
@@ -207,7 +207,7 @@ function App() {
           fontSize: '16px',
           fontWeight: 'bold',
           zIndex: 999,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+          boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
         }}>
           {toast.tipo === 'error' ? '⚠' : '✓'} {toast.mensaje}
         </div>

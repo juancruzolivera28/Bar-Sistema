@@ -121,8 +121,8 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: '#111',
-      color: 'white',
+      backgroundColor: '#ffffff',
+      color: '#1a1a1a',
       overflowY: 'auto',
       padding: '16px'
     }}>
@@ -131,8 +131,8 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
           onClick={onVolver}
           style={{
             background: 'none',
-            border: '1px solid #444',
-            color: 'white',
+            border: '1px solid #ccc',
+            color: '#1a1a1a',
             borderRadius: '8px',
             padding: '8px 14px',
             fontSize: '16px',
@@ -144,7 +144,7 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
         <h2 style={{ margin: 0 }}>{mesa.nombre || `Mesa ${mesa.numero}`}</h2>
       </div>
 
-      <h3 style={{ color: '#aaa', marginBottom: '10px' }}>Agregar productos</h3>
+      <h3 style={{ color: '#666', marginBottom: '10px' }}>Agregar productos</h3>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
@@ -156,8 +156,8 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
             key={producto.id}
             onClick={() => agregarProducto(producto)}
             style={{
-              backgroundColor: producto.stock > 0 ? '#1a73e8' : '#333',
-              color: 'white',
+              backgroundColor: producto.stock > 0 ? '#1a73e8' : '#e0e0e0',
+              color: producto.stock > 0 ? 'white' : '#999',
               border: 'none',
               borderRadius: '10px',
               padding: '14px 10px',
@@ -173,9 +173,9 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
         ))}
       </div>
 
-      <h3 style={{ color: '#aaa', marginBottom: '10px' }}>Pedido actual</h3>
+      <h3 style={{ color: '#666', marginBottom: '10px' }}>Pedido actual</h3>
       {pedidos.length === 0 ? (
-        <p style={{ color: '#555' }}>Sin productos todavía.</p>
+        <p style={{ color: '#888' }}>Sin productos todavía.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
           {pedidos.map(pedido => (
@@ -183,13 +183,14 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              backgroundColor: '#1e1e1e',
+              backgroundColor: '#f4f4f5',
+              border: '1px solid #e0e0e0',
               borderRadius: '10px',
               padding: '12px 16px'
             }}>
               <div>
                 <div style={{ fontWeight: 'bold' }}>{pedido.nombre}</div>
-                <div style={{ fontSize: '13px', color: '#aaa' }}>
+                <div style={{ fontSize: '13px', color: '#666' }}>
                   ${pedido.precio?.toLocaleString()} × {pedido.cantidad}
                 </div>
               </div>
@@ -221,7 +222,8 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
       <div style={{
         position: 'sticky',
         bottom: '16px',
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#f4f4f5',
+        border: '1px solid #e0e0e0',
         borderRadius: '12px',
         padding: '16px',
         display: 'flex',
@@ -229,15 +231,15 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
         alignItems: 'center'
       }}>
         <div>
-          <div style={{ color: '#aaa', fontSize: '13px' }}>Total</div>
+          <div style={{ color: '#666', fontSize: '13px' }}>Total</div>
           <div style={{ fontSize: '24px', fontWeight: 'bold' }}>${total.toLocaleString()}</div>
         </div>
         <button
           onClick={() => setMostrarModalPago(true)}
           disabled={pedidos.length === 0}
           style={{
-            backgroundColor: pedidos.length > 0 ? '#2a9d5c' : '#333',
-            color: 'white',
+            backgroundColor: pedidos.length > 0 ? '#2a9d5c' : '#e0e0e0',
+            color: pedidos.length > 0 ? 'white' : '#999',
             border: 'none',
             borderRadius: '10px',
             padding: '14px 20px',

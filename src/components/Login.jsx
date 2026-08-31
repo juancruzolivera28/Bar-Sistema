@@ -35,23 +35,23 @@ function Login({ onLogin }) {
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: '#111',
+      backgroundColor: '#ffffff',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      color: 'white'
+      color: '#1a1a1a'
     }}>
       <h2
         style={{
           marginBottom: '8px',
           fontSize: '22px',
-          color: 'white'
+          color: '#1a1a1a'
       }}
     >
       Vuelos Bar
     </h2>
-      <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '14px' }}>
+      <p style={{ color: '#666', marginBottom: '32px', fontSize: '14px' }}>
         Ingresá el PIN de administrador
       </p>
 
@@ -61,8 +61,8 @@ function Login({ onLogin }) {
             width: '16px',
             height: '16px',
             borderRadius: '50%',
-            backgroundColor: i < pin.length ? '#1a73e8' : '#333',
-            border: '2px solid #444',
+            backgroundColor: i < pin.length ? '#1a73e8' : '#e0e0e0',
+            border: '2px solid #ccc',
             transition: 'background-color 0.1s'
           }} />
         ))}
@@ -86,9 +86,9 @@ function Login({ onLogin }) {
             onClick={() => agregarDigito(String(n))}
             style={{
               height: '72px',
-              backgroundColor: '#1e1e1e',
-              color: 'white',
-              border: '1px solid #333',
+              backgroundColor: '#f4f4f5',
+              color: '#1a1a1a',
+              border: '1px solid #ddd',
               borderRadius: '12px',
               fontSize: '24px',
               fontWeight: 'bold',
@@ -103,9 +103,9 @@ function Login({ onLogin }) {
           onClick={borrar}
           style={{
             height: '72px',
-            backgroundColor: '#1e1e1e',
-            color: '#aaa',
-            border: '1px solid #333',
+            backgroundColor: '#f4f4f5',
+            color: '#666',
+            border: '1px solid #ddd',
             borderRadius: '12px',
             fontSize: '18px',
             cursor: 'pointer'
@@ -118,9 +118,9 @@ function Login({ onLogin }) {
           onClick={() => agregarDigito('0')}
           style={{
             height: '72px',
-            backgroundColor: '#1e1e1e',
-            color: 'white',
-            border: '1px solid #333',
+            backgroundColor: '#f4f4f5',
+            color: '#1a1a1a',
+            border: '1px solid #ddd',
             borderRadius: '12px',
             fontSize: '24px',
             fontWeight: 'bold',
@@ -134,9 +134,9 @@ function Login({ onLogin }) {
           onClick={verificarPin}
           style={{
             height: '72px',
-            backgroundColor: pin.length > 0 ? '#1a73e8' : '#1e1e1e',
-            color: 'white',
-            border: '1px solid #333',
+            backgroundColor: pin.length > 0 ? '#1a73e8' : '#f4f4f5',
+            color: pin.length > 0 ? 'white' : '#1a1a1a',
+            border: '1px solid #ddd',
             borderRadius: '12px',
             fontSize: '20px',
             cursor: 'pointer'
@@ -152,7 +152,7 @@ function Login({ onLogin }) {
           marginTop: '16px',
           background: 'none',
           border: 'none',
-          color: '#555',
+          color: '#1a73e8',
           fontSize: '14px',
           cursor: 'pointer',
           textDecoration: 'underline'

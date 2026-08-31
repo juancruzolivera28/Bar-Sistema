@@ -82,14 +82,14 @@ function Resumen() {
     cargarResumen()
   }, [])
 
-  if (!datos) return <div style={{ padding: '20px', color: 'white' }}>Cargando...</div>
+  if (!datos) return <div style={{ padding: '20px', color: '#1a1a1a' }}>Cargando...</div>
 
   return (
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: '#111',
-      color: 'white',
+      backgroundColor: '#ffffff',
+      color: '#1a1a1a',
       overflowY: 'auto',
       padding: '16px',
       paddingBottom: '80px'
@@ -107,12 +107,12 @@ function Resumen() {
         >
         <div
           style={{
-            backgroundColor: '#1e1e1e',
+            backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
             borderRadius: '12px',
             padding: '16px'
           }}
         >
-        <div style={{ color: '#888', fontSize: '12px' }}>
+        <div style={{ color: '#666', fontSize: '12px' }}>
           Mesas cerradas
         </div>
         <div style={{ fontSize: '26px', fontWeight: 'bold' }}>
@@ -122,12 +122,12 @@ function Resumen() {
 
       <div
         style={{
-          backgroundColor: '#1e1e1e',
+          backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
           borderRadius: '12px',
           padding: '16px'
         }}
       >
-      <div style={{ color: '#888', fontSize: '12px' }}>
+      <div style={{ color: '#666', fontSize: '12px' }}>
       Ticket promedio
     </div>
     <div style={{ fontSize: '26px', fontWeight: 'bold' }}>
@@ -137,12 +137,12 @@ function Resumen() {
 
   <div
     style={{
-      backgroundColor: '#1e1e1e',
+      backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
       borderRadius: '12px',
       padding: '16px'
     }}
   >
-    <div style={{ color: '#888', fontSize: '12px' }}>
+    <div style={{ color: '#666', fontSize: '12px' }}>
       Más vendido
     </div>
     <div
@@ -158,12 +158,12 @@ function Resumen() {
       </div>
 
       <div style={{
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
         borderRadius: '12px',
         padding: '20px',
         marginBottom: '20px'
       }}>
-        <div style={{ color: '#aaa', fontSize: '13px', marginBottom: '4px' }}>Total del día</div>
+        <div style={{ color: '#666', fontSize: '13px', marginBottom: '4px' }}>Total del día</div>
         <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '16px' }}>
           ${datos.totalGeneral.toLocaleString()}
         </div>
@@ -175,12 +175,12 @@ function Resumen() {
             { key: 'tarjeta', label: 'Tarjeta', color: '#8e44ad' },
           ].map(({ key, label, color }) => (
             <div key={key} style={{
-              backgroundColor: '#2a2a2a',
+              backgroundColor: '#ffffff', border: '1px solid #e0e0e0',
               borderRadius: '10px',
               padding: '12px',
               borderTop: `3px solid ${color}`
             }}>
-              <div style={{ fontSize: '12px', color: '#aaa', marginBottom: '4px' }}>{label}</div>
+              <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>{label}</div>
               <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
                 ${(datos.totales[key] || 0).toLocaleString()}
               </div>
@@ -190,14 +190,14 @@ function Resumen() {
       </div>
 
       <div style={{
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
         borderRadius: '12px',
         padding: '16px',
         marginBottom: '20px'
       }}>
-        <h3 style={{ color: '#aaa', margin: '0 0 12px 0' }}>Productos vendidos</h3>
+        <h3 style={{ color: '#666', margin: '0 0 12px 0' }}>Productos vendidos</h3>
         {Object.keys(datos.productos).length === 0 ? (
-          <p style={{ color: '#555', margin: 0 }}>Sin ventas todavía.</p>
+          <p style={{ color: '#888', margin: 0 }}>Sin ventas todavía.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {Object.entries(datos.productos)
@@ -207,12 +207,12 @@ function Resumen() {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  backgroundColor: '#2a2a2a',
+                  backgroundColor: '#ffffff', border: '1px solid #e0e0e0',
                   borderRadius: '8px',
                   padding: '10px 14px'
                 }}>
                   <span>{nombre}</span>
-                  <span style={{ fontWeight: 'bold', color: '#aaa' }}>× {cantidad}</span>
+                  <span style={{ fontWeight: 'bold', color: '#666' }}>× {cantidad}</span>
                 </div>
               ))
             }
@@ -220,17 +220,17 @@ function Resumen() {
         )}
       </div>
 
-      <h3 style={{ color: '#aaa', marginBottom: '12px' }}>
+      <h3 style={{ color: '#666', marginBottom: '12px' }}>
         Cuentas cerradas ({datos.cuentas.length})
       </h3>
 
       {datos.cuentas.length === 0 ? (
-        <p style={{ color: '#555' }}>No hay cuentas cerradas hoy.</p>
+        <p style={{ color: '#888' }}>No hay cuentas cerradas hoy.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {datos.cuentas.map((cuenta, i) => (
             <div key={i} style={{
-              backgroundColor: '#1e1e1e',
+              backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
               borderRadius: '12px',
               padding: '14px 16px'
             }}>
@@ -239,7 +239,7 @@ function Resumen() {
                 justifyContent: 'space-between',
                 marginBottom: '8px'
               }}>
-                <span style={{ color: '#aaa', fontSize: '13px' }}>{cuenta.fechaHora}</span>
+                <span style={{ color: '#666', fontSize: '13px' }}>{cuenta.fechaHora}</span>
                 <span style={{ fontWeight: 'bold', fontSize: '16px' }}>
                   ${cuenta.total.toLocaleString()}
                 </span>
@@ -251,7 +251,7 @@ function Resumen() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     fontSize: '13px',
-                    color: '#ccc'
+                    color: '#555'
                   }}>
                     <span>{item.nombre} × {item.cantidad}</span>
                     <span>${(item.precio * item.cantidad).toLocaleString()}</span>
@@ -262,11 +262,11 @@ function Resumen() {
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {cuenta.metodo_pago.map((pago, j) => (
                   <span key={j} style={{
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#ffffff', border: '1px solid #e0e0e0',
                     borderRadius: '6px',
                     padding: '3px 10px',
                     fontSize: '12px',
-                    color: '#aaa'
+                    color: '#666'
                   }}>
                     {pago.metodo}: ${(pago.monto || 0).toLocaleString()}
                   </span>

@@ -121,7 +121,7 @@ function Dashboard({ refrescar }) {
 
   const formulario = (
     <div style={{
-      backgroundColor: '#1e1e1e',
+      backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
       borderRadius: '12px',
       padding: '16px',
       marginBottom: '16px',
@@ -177,8 +177,8 @@ function Dashboard({ refrescar }) {
           onClick={cancelar}
           style={{
             flex: 1,
-            backgroundColor: '#333',
-            color: 'white',
+            backgroundColor: '#e0e0e0',
+            color: '#1a1a1a',
             border: 'none',
             borderRadius: '8px',
             padding: '12px',
@@ -196,8 +196,8 @@ function Dashboard({ refrescar }) {
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: '#111',
-      color: 'white',
+      backgroundColor: '#ffffff',
+      color: '#1a1a1a',
       overflowY: 'auto',
       padding: '16px',
       paddingBottom: '80px'
@@ -231,9 +231,9 @@ function Dashboard({ refrescar }) {
         <button
           onClick={mesAnterior}
           style={{
-            background: '#1e1e1e',
-            border: '1px solid #444',
-            color: 'white',
+            background: '#f4f4f5',
+            border: '1px solid #ccc',
+            color: '#1a1a1a',
             borderRadius: '10px',
             padding: '8px 16px',
             fontSize: '16px',
@@ -253,9 +253,9 @@ function Dashboard({ refrescar }) {
         <button
           onClick={mesSiguiente}
           style={{
-            background: '#1e1e1e',
-            border: '1px solid #444',
-            color: 'white',
+            background: '#f4f4f5',
+            border: '1px solid #ccc',
+            color: '#1a1a1a',
             borderRadius: '10px',
             padding: '8px 16px',
             fontSize: '16px',
@@ -272,20 +272,20 @@ function Dashboard({ refrescar }) {
         gap: '10px',
         marginBottom: '20px'
       }}>
-        <div style={{ backgroundColor: '#1e1e1e', borderRadius: '12px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px' }}>Total Ganado</div>
+        <div style={{ backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '16px' }}>
+          <div style={{ color: '#666', fontSize: '12px' }}>Total Ganado</div>
           <div style={{ fontSize: '26px', fontWeight: 'bold', color: '#2a9d5c' }}>
             ${totalGanado.toLocaleString()}
           </div>
         </div>
-        <div style={{ backgroundColor: '#1e1e1e', borderRadius: '12px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px' }}>Total Gastado</div>
+        <div style={{ backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '16px' }}>
+          <div style={{ color: '#666', fontSize: '12px' }}>Total Gastado</div>
           <div style={{ fontSize: '26px', fontWeight: 'bold', color: '#c0392b' }}>
             ${totalGastado.toLocaleString()}
           </div>
         </div>
-        <div style={{ backgroundColor: '#1e1e1e', borderRadius: '12px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px' }}>Ganancia Neta</div>
+        <div style={{ backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '16px' }}>
+          <div style={{ color: '#666', fontSize: '12px' }}>Ganancia Neta</div>
           <div style={{
             fontSize: '26px',
             fontWeight: 'bold',
@@ -299,16 +299,16 @@ function Dashboard({ refrescar }) {
       {nuevoGasto && formulario}
 
       <div style={{
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
         borderRadius: '12px',
         padding: '16px',
         marginBottom: '20px'
       }}>
-        <h3 style={{ color: '#aaa', margin: '0 0 12px 0' }}>
+        <h3 style={{ color: '#666', margin: '0 0 12px 0' }}>
           Ingresos ({ingresos.length})
         </h3>
         {ingresos.length === 0 ? (
-          <p style={{ color: '#555', margin: 0 }}>Sin ingresos este mes.</p>
+          <p style={{ color: '#888', margin: 0 }}>Sin ingresos este mes.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {ingresos.map((ingreso) => {
@@ -318,15 +318,15 @@ function Dashboard({ refrescar }) {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  backgroundColor: '#2a2a2a',
+                  backgroundColor: '#ffffff',
                   borderRadius: '10px',
                   padding: '10px 14px'
                 }}>
                   <div>
-                    <div style={{ fontSize: '13px', color: '#aaa' }}>
+                    <div style={{ fontSize: '13px', color: '#666' }}>
                       {fechaCorta(ingreso.fecha)}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#777', marginTop: '2px' }}>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
                       {numeroMesa != null ? `Mesa ${numeroMesa} · ` : ''}cuenta cerrada
                     </div>
                   </div>
@@ -341,16 +341,16 @@ function Dashboard({ refrescar }) {
       </div>
 
       <div style={{
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
         borderRadius: '12px',
         padding: '16px',
         marginBottom: '20px'
       }}>
-        <h3 style={{ color: '#aaa', margin: '0 0 12px 0' }}>
+        <h3 style={{ color: '#666', margin: '0 0 12px 0' }}>
           Gastos ({gastos.length})
         </h3>
         {gastos.length === 0 ? (
-          <p style={{ color: '#555', margin: 0 }}>Sin gastos este mes.</p>
+          <p style={{ color: '#888', margin: 0 }}>Sin gastos este mes.</p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {gastos.map((gasto) => (
@@ -358,7 +358,7 @@ function Dashboard({ refrescar }) {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                backgroundColor: '#2a2a2a',
+                backgroundColor: '#ffffff',
                 borderRadius: '10px',
                 padding: '10px 14px',
                 gap: '10px',
@@ -368,7 +368,7 @@ function Dashboard({ refrescar }) {
                   <div style={{ fontWeight: 'bold', fontSize: '15px' }}>
                     {gasto.descripcion}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#777', marginTop: '2px' }}>
+                  <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
                     {fechaCorta(gasto.fecha)} · {gasto.categoria}
                   </div>
                 </div>
@@ -401,12 +401,12 @@ function Dashboard({ refrescar }) {
 }
 
 const estiloInput = {
-  backgroundColor: '#2a2a2a',
-  border: '1px solid #444',
+  backgroundColor: '#ffffff',
+  border: '1px solid #ccc',
   borderRadius: '8px',
   padding: '12px',
   fontSize: '15px',
-  color: 'white',
+  color: '#1a1a1a',
   width: '100%',
   boxSizing: 'border-box'
 }

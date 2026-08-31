@@ -42,7 +42,7 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
     <div style={{
       position: 'fixed',
       top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.7)',
+      backgroundColor: 'rgba(0,0,0,0.5)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -50,12 +50,13 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
       padding: '16px'
     }}>
       <div style={{
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#ffffff',
         borderRadius: '16px',
         padding: '24px',
         width: '100%',
         maxWidth: '420px',
-        color: 'white'
+        color: '#1a1a1a',
+        boxShadow: '0 8px 40px rgba(0,0,0,0.2)'
       }}>
 
         <h3 style={{ margin: '0 0 8px 0', fontSize: '18px' }}>Cerrar cuenta</h3>
@@ -71,9 +72,9 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                   key={metodo}
                   onClick={() => pagoDirecto(metodo)}
                   style={{
-                    backgroundColor: '#2a2a2a',
-                    color: 'white',
-                    border: '1px solid #444',
+                    backgroundColor: '#f4f4f5',
+                    color: '#1a1a1a',
+                    border: '1px solid #ddd',
                     borderRadius: '10px',
                     padding: '16px',
                     fontSize: '15px',
@@ -102,7 +103,7 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
               onClick={onCancelar}
               style={{
                 backgroundColor: 'transparent',
-                color: '#aaa',
+                color: '#666',
                 border: 'none',
                 padding: '10px',
                 fontSize: '14px',
@@ -118,24 +119,24 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
             <div style={{
-              backgroundColor: '#2a2a2a',
+              backgroundColor: '#f4f4f5',
               borderRadius: '10px',
               padding: '12px',
               display: 'flex',
               justifyContent: 'space-between'
             }}>
-              <span style={{ color: '#aaa' }}>Pagado</span>
+              <span style={{ color: '#666' }}>Pagado</span>
               <span style={{ fontWeight: 'bold' }}>${totalPagado.toLocaleString()}</span>
             </div>
 
             <div style={{
-              backgroundColor: falta > 0 ? '#3a2a00' : '#1a3a2a',
+              backgroundColor: falta > 0 ? '#fff4e0' : '#e6f4ea',
               borderRadius: '10px',
               padding: '12px',
               display: 'flex',
               justifyContent: 'space-between'
             }}>
-              <span style={{ color: '#aaa' }}>Falta</span>
+              <span style={{ color: '#666' }}>Falta</span>
               <span style={{ fontWeight: 'bold', color: falta > 0 ? '#e07b00' : '#2a9d5c' }}>
                 ${falta.toLocaleString()}
               </span>
@@ -148,7 +149,7 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    backgroundColor: '#2a2a2a',
+                    backgroundColor: '#f4f4f5',
                     borderRadius: '8px',
                     padding: '8px 12px'
                   }}>
@@ -185,9 +186,9 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                       onClick={() => setMetodoActual(m)}
                       style={{
                         flex: 1,
-                        backgroundColor: metodoActual === m ? '#1a73e8' : '#2a2a2a',
-                        color: 'white',
-                        border: 'none',
+                        backgroundColor: metodoActual === m ? '#1a73e8' : '#f4f4f5',
+                        color: metodoActual === m ? 'white' : '#1a1a1a',
+                        border: metodoActual === m ? 'none' : '1px solid #ddd',
                         borderRadius: '8px',
                         padding: '8px',
                         fontSize: '12px',
@@ -206,12 +207,12 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                     onChange={(e) => setMontoActual(e.target.value)}
                     style={{
                       flex: 1,
-                      backgroundColor: '#2a2a2a',
-                      border: '1px solid #444',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #ccc',
                       borderRadius: '8px',
                       padding: '10px',
                       fontSize: '15px',
-                      color: 'white'
+                      color: '#1a1a1a'
                     }}
                   />
                   <button
@@ -237,8 +238,8 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                 onClick={() => { setModo(null); setPagos([]) }}
                 style={{
                   flex: 1,
-                  backgroundColor: '#333',
-                  color: 'white',
+                  backgroundColor: '#e0e0e0',
+                  color: '#1a1a1a',
                   border: 'none',
                   borderRadius: '8px',
                   padding: '12px',
@@ -253,8 +254,8 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                 disabled={falta > 0}
                 style={{
                   flex: 1,
-                  backgroundColor: falta === 0 ? '#2a9d5c' : '#333',
-                  color: 'white',
+                  backgroundColor: falta === 0 ? '#2a9d5c' : '#e0e0e0',
+                  color: falta === 0 ? 'white' : '#999',
                   border: 'none',
                   borderRadius: '8px',
                   padding: '12px',
