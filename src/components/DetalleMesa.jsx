@@ -6,6 +6,15 @@ import { iniciarSyncMesa } from '../sync.js'
 function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   const [pedidos, setPedidos] = useState([])
   const [productos, setProductos] = useState([])
+  // Reflejo local del estado de la mesa. Sirve para el update optimista de
+  // "agregar producto" (marcar 'ocupada' sin esperar al servidor) y para su
+  // revert. La pantalla de detalle no dibuja el estado de la mesa (eso vive en
+  // la grilla de atras), asi que hoy no tiene efecto visual aca, pero mantiene
+  // el guard y el revert consistentes.
+  // No se resincroniza con mesa.estado: DetalleMesa se monta de cero en cada
+  // seleccion de mesa (al volver, App pone mesaSeleccionada=null y desmonta),
+  // asi que el valor inicial siempre esta fresco.
+  const [estadoMesa, setEstadoMesa] = useState(mesa.estado)
   const [mostrarModalPago, setMostrarModalPago] = useState(false)
 
   // Total derivado de pedidos: asi siempre coincide con lo que se ve en la
@@ -43,27 +52,65 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
       return
     }
 
-    const pedidosMesa = await getByIndex('pedidos', 'mesa_id', mesa.id)
-    const existente = pedidosMesa.find(p => p.producto_id === producto.id)
+    // --- Update optimista: reflejamos el alta en pantalla YA, antes de tocar
+    // Supabase. La cadena de awaits de abajo queda igual y el cargarDatos()
+    // final reconcilia el estado optimista con el real del servidor.
+    const pedidosPrevios = pedidos
+    const estadoMesaPrevio = estadoMesa
 
-    if (existente) {
-      await actualizar('pedidos', {
-        ...existente,
-        cantidad: existente.cantidad + 1,
-        timestamp: Date.now()
-      })
-    } else {
-      await agregar('pedidos', {
-        mesa_id: mesa.id,
-        producto_id: producto.id,
-        cantidad: 1,
-        timestamp: Date.now()
-      })
+    setPedidos(prev => {
+      const yaEsta = prev.find(p => p.producto_id === producto.id)
+      if (yaEsta) {
+        return prev.map(p =>
+          p.producto_id === producto.id
+            ? { ...p, cantidad: p.cantidad + 1 }
+            : p
+        )
+      }
+      return [
+        ...prev,
+        {
+          // id temporal: cargarDatos() lo reemplaza por la fila real.
+          id: `optimista-${producto.id}-${Date.now()}`,
+          mesa_id: mesa.id,
+          producto_id: producto.id,
+          cantidad: 1,
+          nombre: producto.nombre,
+          precio: producto.precio
+        }
+      ]
+    })
+    if (estadoMesa !== 'ocupada') setEstadoMesa('ocupada')
+
+    try {
+      const pedidosMesa = await getByIndex('pedidos', 'mesa_id', mesa.id)
+      const existente = pedidosMesa.find(p => p.producto_id === producto.id)
+
+      if (existente) {
+        await actualizar('pedidos', {
+          ...existente,
+          cantidad: existente.cantidad + 1,
+          timestamp: Date.now()
+        })
+      } else {
+        await agregar('pedidos', {
+          mesa_id: mesa.id,
+          producto_id: producto.id,
+          cantidad: 1,
+          timestamp: Date.now()
+        })
+      }
+
+      await actualizar('mesas', { ...mesa, estado: 'ocupada' })
+      onActualizarMesa()
+      cargarDatos()
+    } catch {
+      // Revert: volvemos pedidos y el reflejo local de la mesa a como estaban
+      // antes del click. realtime / el intervalo global reconcilian el resto.
+      setPedidos(pedidosPrevios)
+      setEstadoMesa(estadoMesaPrevio)
+      onToast(`No se pudo agregar "${producto.nombre}". La acción no se guardó.`, 'error')
     }
-
-    await actualizar('mesas', { ...mesa, estado: 'ocupada' })
-    onActualizarMesa()
-    cargarDatos()
   }
 
   async function quitarProducto(pedido) {
