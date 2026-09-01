@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function ModalPago({ total, onConfirmar, onCancelar }) {
+function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
   const [modo, setModo] = useState(null) // null | 'mixto'
   const [pagos, setPagos] = useState([])
   const [metodoActual, setMetodoActual] = useState('efectivo')
@@ -66,11 +66,17 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
 
         {modo === null && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {procesando && (
+              <div style={{ textAlign: 'center', color: '#666', fontSize: '14px', padding: '4px' }}>
+                Procesando...
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               {['efectivo', 'transferencia', 'tarjeta'].map((metodo) => (
                 <button
                   key={metodo}
                   onClick={() => pagoDirecto(metodo)}
+                  disabled={procesando}
                   style={{
                     backgroundColor: '#f4f4f5',
                     color: '#1a1a1a',
@@ -78,7 +84,8 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                     borderRadius: '10px',
                     padding: '16px',
                     fontSize: '15px',
-                    cursor: 'pointer'
+                    cursor: procesando ? 'not-allowed' : 'pointer',
+                    opacity: procesando ? 0.6 : 1
                   }}
                 >
                   {etiquetaMetodo(metodo)}
@@ -86,6 +93,7 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
               ))}
               <button
                 onClick={() => setModo('mixto')}
+                disabled={procesando}
                 style={{
                   backgroundColor: '#1a73e8',
                   color: 'white',
@@ -93,7 +101,8 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                   borderRadius: '10px',
                   padding: '16px',
                   fontSize: '15px',
-                  cursor: 'pointer'
+                  cursor: procesando ? 'not-allowed' : 'pointer',
+                  opacity: procesando ? 0.6 : 1
                 }}
               >
                 Mixto
@@ -101,13 +110,14 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
             </div>
             <button
               onClick={onCancelar}
+              disabled={procesando}
               style={{
                 backgroundColor: 'transparent',
                 color: '#666',
                 border: 'none',
                 padding: '10px',
                 fontSize: '14px',
-                cursor: 'pointer'
+                cursor: procesando ? 'not-allowed' : 'pointer'
               }}
             >
               Cancelar
@@ -236,6 +246,7 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
             <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
               <button
                 onClick={() => { setModo(null); setPagos([]) }}
+                disabled={procesando}
                 style={{
                   flex: 1,
                   backgroundColor: '#e0e0e0',
@@ -244,14 +255,15 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                   borderRadius: '8px',
                   padding: '12px',
                   fontSize: '15px',
-                  cursor: 'pointer'
+                  cursor: procesando ? 'not-allowed' : 'pointer',
+                  opacity: procesando ? 0.6 : 1
                 }}
               >
                 Atrás
               </button>
               <button
                 onClick={() => onConfirmar(pagos)}
-                disabled={falta > 0}
+                disabled={falta > 0 || procesando}
                 style={{
                   flex: 1,
                   backgroundColor: falta === 0 ? '#2a9d5c' : '#e0e0e0',
@@ -260,10 +272,10 @@ function ModalPago({ total, onConfirmar, onCancelar }) {
                   borderRadius: '8px',
                   padding: '12px',
                   fontSize: '15px',
-                  cursor: falta === 0 ? 'pointer' : 'not-allowed'
+                  cursor: (falta === 0 && !procesando) ? 'pointer' : 'not-allowed'
                 }}
               >
-                Confirmar
+                {procesando ? 'Procesando...' : 'Confirmar'}
               </button>
             </div>
           </div>

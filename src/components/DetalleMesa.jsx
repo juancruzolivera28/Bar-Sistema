@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react'
-import { getAll, getByIndex, agregar, actualizar, eliminar } from '../db/database.js'
+import { useState, useEffect, useRef } from 'react'
+import { getAll, getByIndex, agregar, actualizar, eliminar, getRestauranteId } from '../db/database.js'
+import { supabase } from '../db/supabaseClient.js'
 import ModalPago from './ModalPago.jsx'
 import { iniciarSyncMesa } from '../sync.js'
+
+// Una fila de pedido "optimista" todavia no existe en la base: su id es un
+// string temporal (ver agregarProducto) hasta que cargarPedidos() la reemplaza
+// por la fila real. No se puede mandar ese id a Supabase.
+const esOptimista = (id) => typeof id === 'string' && id.startsWith('optimista-')
 
 function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   const [pedidos, setPedidos] = useState([])
   const [productos, setProductos] = useState([])
+  // Catalogo tambien en un ref: cargarPedidos() lo lee para enriquecer las
+  // filas con nombre/precio sin depender del closure de estado, que quedaria
+  // viejo cuando lo invoca el callback de iniciarSyncMesa (suscripto una vez).
+  const productosRef = useRef([])
   // Reflejo local del estado de la mesa. Sirve para el update optimista de
   // "agregar producto" (marcar 'ocupada' sin esperar al servidor) y para su
   // revert. La pantalla de detalle no dibuja el estado de la mesa (eso vive en
@@ -16,6 +26,9 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   // asi que el valor inicial siempre esta fresco.
   const [estadoMesa, setEstadoMesa] = useState(mesa.estado)
   const [mostrarModalPago, setMostrarModalPago] = useState(false)
+  // Guard de doble submit del cierre de cuenta: mientras la RPC esta en vuelo,
+  // confirmarPago corta al entrar y ModalPago deshabilita sus botones.
+  const [cerrando, setCerrando] = useState(false)
 
   // Total derivado de pedidos: asi siempre coincide con lo que se ve en la
   // lista. Antes era un useState que seteaba cargarDatos, pero en cada alta
@@ -25,24 +38,35 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   const total = pedidos.reduce((acc, p) => acc + (Number(p.precio) || 0) * p.cantidad, 0)
 
   useEffect(() => {
-    const detener = iniciarSyncMesa(mesa.id, cargarDatos)
+    const detener = iniciarSyncMesa(mesa.id, cargarPedidos)
     return () => detener()
   }, [mesa.id])
 
   useEffect(() => {
-    cargarDatos()
+    cargarPedidos()
   }, [mesa.id, refrescar])
 
-  async function cargarDatos() {
+  // Catalogo de productos: no cambia durante el armado del pedido, asi que se
+  // trae una sola vez (cargarPedidos lo dispara la primera vez, ver abajo) y no
+  // se repite en cada alta ni en cada refresco.
+  async function cargarCatalogo() {
     const todosProductos = await getAll('productos')
     todosProductos.sort((a, b) => a.nombre.localeCompare(b.nombre))
+    productosRef.current = todosProductos
     setProductos(todosProductos)
+  }
 
+  // Pedidos de la mesa: se recarga en el montaje, en cada bump de refrescar, en
+  // cada evento de Realtime y despues de cada operacion. La primera vez tambien
+  // trae el catalogo para poder enriquecer las filas.
+  async function cargarPedidos() {
+    if (productosRef.current.length === 0) await cargarCatalogo()
     const pedidosMesa = await getByIndex('pedidos', 'mesa_id', mesa.id)
-    const pedidosConNombre = await Promise.all(pedidosMesa.map(async (p) => {
-      const producto = todosProductos.find(pr => pr.id === p.producto_id)
+    const catalogo = productosRef.current
+    const pedidosConNombre = pedidosMesa.map((p) => {
+      const producto = catalogo.find(pr => pr.id === p.producto_id)
       return { ...p, nombre: producto?.nombre, precio: producto?.precio }
-    }))
+    })
     setPedidos(pedidosConNombre)
   }
 
@@ -53,7 +77,7 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
     }
 
     // --- Update optimista: reflejamos el alta en pantalla YA, antes de tocar
-    // Supabase. La cadena de awaits de abajo queda igual y el cargarDatos()
+    // Supabase. Las escrituras de abajo corren despues y el cargarPedidos()
     // final reconcilia el estado optimista con el real del servidor.
     const pedidosPrevios = pedidos
     const estadoMesaPrevio = estadoMesa
@@ -70,7 +94,7 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
       return [
         ...prev,
         {
-          // id temporal: cargarDatos() lo reemplaza por la fila real.
+          // id temporal: cargarPedidos() lo reemplaza por la fila real.
           id: `optimista-${producto.id}-${Date.now()}`,
           mesa_id: mesa.id,
           producto_id: producto.id,
@@ -82,14 +106,21 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
     })
     if (estadoMesa !== 'ocupada') setEstadoMesa('ocupada')
 
-    try {
-      const pedidosMesa = await getByIndex('pedidos', 'mesa_id', mesa.id)
-      const existente = pedidosMesa.find(p => p.producto_id === producto.id)
+    // Buscamos el pedido existente en el estado local (ya lo tenemos en
+    // memoria) en vez de un nuevo getByIndex. Solo cuenta si es una fila real:
+    // si es optimista, la escritura de ese click todavia esta en vuelo.
+    const enPedidoLocal = pedidos.find(p => p.producto_id === producto.id)
+    const existenteReal = enPedidoLocal && !esOptimista(enPedidoLocal.id) ? enPedidoLocal : null
 
-      if (existente) {
+    try {
+      if (existenteReal) {
+        // Payload explicito con solo columnas reales de 'pedidos' (nombre y
+        // precio son campos que agregamos en el cliente, no columnas).
         await actualizar('pedidos', {
-          ...existente,
-          cantidad: existente.cantidad + 1,
+          id: existenteReal.id,
+          mesa_id: existenteReal.mesa_id,
+          producto_id: existenteReal.producto_id,
+          cantidad: existenteReal.cantidad + 1,
           timestamp: Date.now()
         })
       } else {
@@ -101,9 +132,13 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
         })
       }
 
-      await actualizar('mesas', { ...mesa, estado: 'ocupada' })
+      // Solo tocamos 'mesas' si de verdad venia sin ocupar (primer producto de
+      // la sesion). estadoMesaPrevio es el valor de antes del setEstadoMesa.
+      if (estadoMesaPrevio !== 'ocupada') {
+        await actualizar('mesas', { ...mesa, estado: 'ocupada' })
+      }
       onActualizarMesa()
-      cargarDatos()
+      cargarPedidos()
     } catch {
       // Revert: volvemos pedidos y el reflejo local de la mesa a como estaban
       // antes del click. realtime / el intervalo global reconcilian el resto.
@@ -114,56 +149,61 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
   }
 
   async function quitarProducto(pedido) {
-    if (pedido.cantidad > 1) {
-      await actualizar('pedidos', {
-        id: pedido.id,
-        mesa_id: pedido.mesa_id,
-        producto_id: pedido.producto_id,
-        cantidad: pedido.cantidad - 1,
-        timestamp: Date.now()
-      })
-    } else {
-      await eliminar('pedidos', pedido.id)
+    // Fila todavia optimista: el boton "-" ya deberia estar deshabilitado en el
+    // render, pero ademas cortamos aca para no mandar el id temporal a Supabase.
+    if (esOptimista(pedido.id)) return
+
+    const pedidosPrevios = pedidos
+
+    // Update optimista: bajamos la cantidad (o sacamos la fila si llega a 0)
+    // antes de tocar Supabase. cargarPedidos() reconcilia despues.
+    setPedidos(prev => prev
+      .map(p => p.id === pedido.id ? { ...p, cantidad: p.cantidad - 1 } : p)
+      .filter(p => p.cantidad > 0)
+    )
+
+    try {
+      if (pedido.cantidad > 1) {
+        await actualizar('pedidos', {
+          id: pedido.id,
+          mesa_id: pedido.mesa_id,
+          producto_id: pedido.producto_id,
+          cantidad: pedido.cantidad - 1,
+          timestamp: Date.now()
+        })
+      } else {
+        await eliminar('pedidos', pedido.id)
+      }
+      cargarPedidos()
+    } catch {
+      setPedidos(pedidosPrevios)
+      onToast(`No se pudo quitar "${pedido.nombre}". La acción no se guardó.`, 'error')
     }
-    cargarDatos()
   }
 
   async function confirmarPago(pagos) {
-    await agregar('historial', {
-      mesa_id: mesa.id,
-      total,
-      fecha: Date.now(),
-      detalle: pedidos.map(p => ({
-        nombre: p.nombre,
-        cantidad: p.cantidad,
-        precio: p.precio
-      })),
-      metodo_pago: pagos
-    })
-
-    for (const p of pedidos) {
-      const producto = productos.find(pr => pr.id === p.producto_id)
-      if (producto) {
-        // Payload minimo (solo id + stock): el mozo tiene permiso de UPDATE
-        // acotado a la columna stock de productos (ver migracion_multitenant.sql).
-        await actualizar('productos', {
-          id: producto.id,
-          stock: producto.stock - p.cantidad
-        })
-      }
+    // Todo el cierre (historial + descuento de stock + borrado de pedidos +
+    // liberar la mesa) lo hace la RPC cerrar_cuenta en UNA transaccion atomica
+    // del lado del servidor. Ver supabase/cerrar_cuenta_rpc.sql.
+    if (cerrando) return
+    setCerrando(true)
+    try {
+      const { error } = await supabase.rpc('cerrar_cuenta', {
+        p_mesa_id: mesa.id,
+        p_restaurante_id: getRestauranteId(),
+        p_metodo_pago: pagos
+      })
+      if (error) throw error
+      onToast(`Mesa ${mesa.numero || mesa.nombre} cerrada correctamente`)
+      setMostrarModalPago(false)
+      onActualizarMesa()
+      onVolver()
+    } catch (err) {
+      // La transaccion se revirtio entera: no queda nada a medias. Reactivamos
+      // los botones y dejamos el modal abierto para reintentar.
+      onToast(`No se pudo cerrar la cuenta.${err?.message ? ` (${err.message})` : ''} Volvé a intentar.`, 'error')
+      setCerrando(false)
     }
-
-    const pedidosMesa = await getByIndex('pedidos', 'mesa_id', mesa.id)
-    for (const p of pedidosMesa) {
-      await eliminar('pedidos', p.id)
-    }
-
-    await actualizar('mesas', { ...mesa, estado: 'libre' })
-
-    onToast(`Mesa ${mesa.numero || mesa.nombre} cerrada correctamente`)
-    setMostrarModalPago(false)
-    onActualizarMesa()
-    onVolver()
   }
 
   return (
@@ -227,44 +267,52 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
         <p style={{ color: '#888' }}>Sin productos todavía.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
-          {pedidos.map(pedido => (
-            <div key={pedido.id} style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: '#f4f4f5',
-              border: '1px solid #e0e0e0',
-              borderRadius: '10px',
-              padding: '12px 16px'
-            }}>
-              <div>
-                <div style={{ fontWeight: 'bold' }}>{pedido.nombre}</div>
-                <div style={{ fontSize: '13px', color: '#666' }}>
-                  ${pedido.precio?.toLocaleString()} × {pedido.cantidad}
+          {pedidos.map(pedido => {
+            // Mientras la fila sea optimista (id temporal) no se puede operar
+            // contra la base: deshabilitamos "-" hasta que cargarPedidos() la
+            // reemplace por la fila real. Se rehabilita solo.
+            const filaOptimista = esOptimista(pedido.id)
+            return (
+              <div key={pedido.id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#f4f4f5',
+                border: '1px solid #e0e0e0',
+                borderRadius: '10px',
+                padding: '12px 16px'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 'bold' }}>{pedido.nombre}</div>
+                  <div style={{ fontSize: '13px', color: '#666' }}>
+                    ${pedido.precio?.toLocaleString()} × {pedido.cantidad}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontWeight: 'bold' }}>
+                    ${((pedido.precio || 0) * pedido.cantidad).toLocaleString()}
+                  </span>
+                  <button
+                    onClick={() => quitarProducto(pedido)}
+                    disabled={filaOptimista}
+                    style={{
+                      background: '#c0392b',
+                      border: 'none',
+                      color: 'white',
+                      borderRadius: '6px',
+                      width: '28px',
+                      height: '28px',
+                      fontSize: '16px',
+                      cursor: filaOptimista ? 'not-allowed' : 'pointer',
+                      opacity: filaOptimista ? 0.5 : 1
+                    }}
+                  >
+                    −
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontWeight: 'bold' }}>
-                  ${((pedido.precio || 0) * pedido.cantidad).toLocaleString()}
-                </span>
-                <button
-                  onClick={() => quitarProducto(pedido)}
-                  style={{
-                    background: '#c0392b',
-                    border: 'none',
-                    color: 'white',
-                    borderRadius: '6px',
-                    width: '28px',
-                    height: '28px',
-                    fontSize: '16px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  −
-                </button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -303,6 +351,7 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
       {mostrarModalPago && (
         <ModalPago
           total={total}
+          procesando={cerrando}
           onConfirmar={confirmarPago}
           onCancelar={() => setMostrarModalPago(false)}
         />
