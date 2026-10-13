@@ -56,5 +56,12 @@ export const estilos = {
     margin: '4px 0 0 0',
     maxWidth: '260px',
     textAlign: 'center'
+  },
+  exito: {
+    color: '#2a9d5c',
+    fontSize: '14px',
+    margin: '4px 0 0 0',
+    maxWidth: '260px',
+    textAlign: 'center'
   }
 }

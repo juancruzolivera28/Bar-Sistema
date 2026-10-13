@@ -8,6 +8,7 @@ import Stock from './components/Stock.jsx'
 import Resumen from './components/Resumen.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import Login from './components/Login.jsx'
+import NuevaContrasena from './components/NuevaContrasena.jsx'
 import CodigoAcceso from './components/CodigoAcceso.jsx'
 import BottomNav from './components/BottomNav.jsx'
 import { ALTO_BOTTOM_NAV } from './components/bottomNavConfig.js'
@@ -34,6 +35,10 @@ function App() {
 
   // Sesion / tenant
   const [sesionCargando, setSesionCargando] = useState(true)
+  // El dueño volvio desde el link de recuperacion de contraseña (evento
+  // PASSWORD_RECOVERY): mientras esto sea true no se muestra la app ni el
+  // login, solo NuevaContrasena.
+  const [modoRecuperacion, setModoRecuperacion] = useState(false)
   const [restauranteId, setRestauranteId] = useState(null)
   const [nombreRestaurante, setNombreRestaurante] = useState('')
   // El dueño se registro (auth) pero todavia no creo su restaurante.
@@ -118,7 +123,12 @@ function App() {
     }
 
     supabase.auth.getSession().then(({ data }) => aplicarSesion(data.session))
-    const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((evt, session) => {
+      // El dueño volvio desde el link del mail de "olvidé mi contraseña".
+      // aplicarSesion sigue corriendo igual (deja todo listo para cuando
+      // termine de elegir la contraseña nueva), pero el render de abajo
+      // tapa la app con NuevaContrasena hasta que eso pase.
+      if (evt === 'PASSWORD_RECOVERY') setModoRecuperacion(true)
       aplicarSesion(session)
     })
 
@@ -216,7 +226,9 @@ function App() {
         </div>
       )}
 
-      {sesionCargando ? (
+      {modoRecuperacion ? (
+        <NuevaContrasena onListo={() => setModoRecuperacion(false)} />
+      ) : sesionCargando ? (
         <div style={{ padding: '20px', color: '#1a1a1a' }}>
           <p>Cargando...</p>
         </div>

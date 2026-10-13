@@ -13,6 +13,15 @@ function traducir(mensaje) {
   return mensaje || 'Ocurrió un error. Reintentá.'
 }
 
+// Supabase limita cuántos mails de recuperación se pueden pedir seguidos
+// para el mismo email (status 429 / "security purposes").
+function esLimiteEnvios(err) {
+  if (!err) return false
+  if (err.status === 429) return true
+  const m = (err.message || '').toLowerCase()
+  return m.includes('rate limit') || m.includes('security purposes') || m.includes('only request this after')
+}
+
 // Flujo de dueño: login / registro con email + contraseña.
 // En registro, despues de crear el usuario se pide nombre del restaurante y
 // cantidad de mesas, y se llama a la funcion RPC crear_restaurante.
@@ -23,7 +32,7 @@ function traducir(mensaje) {
 //    (el usuario ya esta autenticado pero sin restaurante).
 //  - onVolver: volver al selector dueño/mozo (null si no aplica).
 function LoginDueno({ onListo, forzarCrearRestaurante, onVolver }) {
-  const [modo, setModo] = useState('login') // 'login' | 'registro'
+  const [modo, setModo] = useState('login') // 'login' | 'registro' | 'recuperar'
   const [paso, setPaso] = useState(forzarCrearRestaurante ? 'restaurante' : 'credenciales')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,6 +40,7 @@ function LoginDueno({ onListo, forzarCrearRestaurante, onVolver }) {
   const [cantidadMesas, setCantidadMesas] = useState('')
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
+  const [recuperacionEnviada, setRecuperacionEnviada] = useState(false)
 
   async function entrar() {
     setError(''); setCargando(true)
@@ -56,6 +66,29 @@ function LoginDueno({ onListo, forzarCrearRestaurante, onVolver }) {
       return
     }
     setPaso('restaurante')
+  }
+
+  async function enviarRecuperacion() {
+    setError('')
+    if (!email.trim()) { setError('Ingresá tu email.'); return }
+    setCargando(true)
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: window.location.origin
+    })
+    setCargando(false)
+    if (esLimiteEnvios(err)) {
+      setError('Pediste demasiados links de recuperación. Esperá unos minutos y volvé a intentar.')
+      return
+    }
+    // Mensaje generico (exista o no el email) para no revelar que emails
+    // estan registrados, incluso si Supabase devolvio algun otro error.
+    setRecuperacionEnviada(true)
+  }
+
+  function volverALogin() {
+    setModo('login')
+    setError('')
+    setRecuperacionEnviada(false)
   }
 
   async function crearRestaurante() {
@@ -110,6 +143,55 @@ function LoginDueno({ onListo, forzarCrearRestaurante, onVolver }) {
     )
   }
 
+  // --- Recuperar contraseña -----------------------------------------------
+  if (modo === 'recuperar') {
+    return (
+      <div style={estilos.pantalla}>
+        <h2 style={{ margin: '0 0 4px 0', fontSize: '22px', color: '#1a1a1a' }}>
+          Recuperar contraseña
+        </h2>
+        <p style={{ color: '#666', margin: '0 0 24px 0', fontSize: '14px' }}>
+          Dueño del restaurante
+        </p>
+
+        {recuperacionEnviada ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+            <p style={estilos.exito}>
+              Si el email está registrado, te enviamos un link para restablecer tu contraseña.
+            </p>
+            <button style={estilos.link} onClick={volverALogin}>
+              Volver a iniciar sesión
+            </button>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <input
+                style={estilos.input}
+                type="email"
+                placeholder="Email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <button style={estilos.botonPrimario} onClick={enviarRecuperacion} disabled={cargando}>
+                {cargando ? 'Enviando...' : 'Enviar link de recuperación'}
+              </button>
+            </div>
+
+            {error && <p style={estilos.error}>{error}</p>}
+
+            <div style={{ marginTop: '20px' }}>
+              <button style={estilos.link} onClick={volverALogin}>
+                Volver
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
+
   // --- Paso 1: credenciales ---------------------------------------------------
   return (
     <div style={estilos.pantalla}>
@@ -149,6 +231,14 @@ function LoginDueno({ onListo, forzarCrearRestaurante, onVolver }) {
       {error && <p style={estilos.error}>{error}</p>}
 
       <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+        {modo === 'login' && (
+          <button
+            style={estilos.link}
+            onClick={() => { setModo('recuperar'); setError('') }}
+          >
+            Olvidé mi contraseña
+          </button>
+        )}
         <button
           style={estilos.link}
           onClick={() => { setModo(modo === 'login' ? 'registro' : 'login'); setError('') }}
