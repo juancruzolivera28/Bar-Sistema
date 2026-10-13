@@ -85,67 +85,66 @@ function Resumen() {
       padding: '16px',
       paddingBottom: 'calc(80px + env(safe-area-inset-bottom))'
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
-        <h2 style={{ margin: 0 }}>Resumen del día</h2>
+      <div style={{ marginBottom: '20px' }}>
+        <h2 style={{ margin: '0 0 12px 0' }}>Resumen del día</h2>
 
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-            gap: '10px',
-            marginBottom: '20px'
+            gap: '10px'
           }}
         >
-        <div
-          style={{
-            backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
-            borderRadius: '12px',
-            padding: '16px'
-          }}
-        >
-        <div style={{ color: '#666', fontSize: '12px' }}>
-          Mesas cerradas
-        </div>
-        <div style={{ fontSize: '26px', fontWeight: 'bold' }}>
-          {datos.cantidadMesas}
-        </div>
-      </div>
+          <div
+            style={{
+              backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
+              borderRadius: '12px',
+              padding: '16px'
+            }}
+          >
+            <div style={{ color: '#666', fontSize: '12px' }}>
+              Mesas cerradas
+            </div>
+            <div style={{ fontSize: '26px', fontWeight: 'bold' }}>
+              {datos.cantidadMesas}
+            </div>
+          </div>
 
-      <div
-        style={{
-          backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
-          borderRadius: '12px',
-          padding: '16px'
-        }}
-      >
-      <div style={{ color: '#666', fontSize: '12px' }}>
-      Ticket promedio
-    </div>
-    <div style={{ fontSize: '26px', fontWeight: 'bold' }}>
-      ${datos.ticketPromedio.toLocaleString()}
-    </div>
-  </div>
+          <div
+            style={{
+              backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
+              borderRadius: '12px',
+              padding: '16px'
+            }}
+          >
+            <div style={{ color: '#666', fontSize: '12px' }}>
+              Ticket promedio
+            </div>
+            <div style={{ fontSize: '26px', fontWeight: 'bold' }}>
+              ${datos.ticketPromedio.toLocaleString()}
+            </div>
+          </div>
 
-  <div
-    style={{
-      backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
-      borderRadius: '12px',
-      padding: '16px'
-    }}
-  >
-    <div style={{ color: '#666', fontSize: '12px' }}>
-      Más vendido
-    </div>
-    <div
-      style={{
-        fontSize: '18px',
-        fontWeight: 'bold'
-      }}
-    >
-      {datos.productoMasVendido}
-    </div>
-  </div>
-</div>
+          <div
+            style={{
+              backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
+              borderRadius: '12px',
+              padding: '16px'
+            }}
+          >
+            <div style={{ color: '#666', fontSize: '12px' }}>
+              Más vendido
+            </div>
+            <div
+              style={{
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}
+            >
+              {datos.productoMasVendido}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div style={{
