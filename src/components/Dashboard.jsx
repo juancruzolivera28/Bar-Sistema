@@ -155,7 +155,14 @@ function Dashboard({ refrescar }) {
         type="date"
         value={form.fecha}
         onChange={(e) => setForm({ ...form, fecha: e.target.value })}
-        style={estiloInput}
+        style={{
+          ...estiloInput,
+          minWidth: 0,
+          maxWidth: '100%',
+          appearance: 'none',
+          WebkitAppearance: 'none',
+          textAlign: 'left'
+        }}
       />
       <div style={{ display: 'flex', gap: '10px' }}>
         <button

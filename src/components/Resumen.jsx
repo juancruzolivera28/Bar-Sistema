@@ -86,7 +86,7 @@ function Resumen() {
       paddingBottom: 'calc(80px + env(safe-area-inset-bottom))'
     }}>
       <div style={{ marginBottom: '20px' }}>
-        <h2 style={{ margin: '0 0 12px 0' }}>Resumen del día</h2>
+        <h2 style={{ margin: '0 0 12px 0', textAlign: 'center' }}>Resumen del día</h2>
 
         <div
           style={{
