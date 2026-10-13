@@ -79,7 +79,7 @@ function CodigoAcceso({ restauranteId }) {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
         <h2 style={{ margin: 0 }}>Código de acceso</h2>
       </div>
-      <p style={{ color: '#666', fontSize: '14px', margin: '0 0 20px 0', maxWidth: '420px' }}>
+      <p style={{ color: '#666', fontSize: '15px', margin: '0 0 20px 0', maxWidth: '420px' }}>
         Compartí este código con tus mozos para que puedan acceder al sistema
         desde sus celulares. Lo ingresan una sola vez.
       </p>
@@ -130,7 +130,12 @@ function CodigoAcceso({ restauranteId }) {
         )}
       </div>
 
-      <div style={{ maxWidth: '420px', marginTop: '28px' }}>
+      <div style={{
+        maxWidth: '420px',
+        marginTop: '32px',
+        paddingTop: '20px',
+        borderTop: '1px solid #e0e0e0'
+      }}>
         <button
           onClick={regenerar}
           disabled={regenerando || cargando}
@@ -146,7 +151,7 @@ function CodigoAcceso({ restauranteId }) {
         >
           {regenerando ? 'Regenerando...' : 'Regenerar código'}
         </button>
-        <p style={{ color: '#666', fontSize: '13px', margin: '10px 0 0 0' }}>
+        <p style={{ color: '#666', fontSize: '12px', margin: '10px 0 0 0' }}>
           Genera un código nuevo. El anterior deja de servir para vincular
           dispositivos nuevos; los mozos ya vinculados siguen funcionando.
         </p>

@@ -71,7 +71,7 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                 Procesando...
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
               {['efectivo', 'transferencia', 'tarjeta'].map((metodo) => (
                 <button
                   key={metodo}
@@ -82,7 +82,7 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                     color: '#1a1a1a',
                     border: '1px solid #ddd',
                     borderRadius: '10px',
-                    padding: '16px',
+                    padding: '16px 8px',
                     fontSize: '15px',
                     cursor: procesando ? 'not-allowed' : 'pointer',
                     opacity: procesando ? 0.6 : 1
@@ -91,23 +91,24 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                   {etiquetaMetodo(metodo)}
                 </button>
               ))}
-              <button
-                onClick={() => setModo('mixto')}
-                disabled={procesando}
-                style={{
-                  backgroundColor: '#1a73e8',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '16px',
-                  fontSize: '15px',
-                  cursor: procesando ? 'not-allowed' : 'pointer',
-                  opacity: procesando ? 0.6 : 1
-                }}
-              >
-                Mixto
-              </button>
             </div>
+            <button
+              onClick={() => setModo('mixto')}
+              disabled={procesando}
+              style={{
+                backgroundColor: '#1a73e8',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '16px',
+                fontSize: '15px',
+                marginTop: '2px',
+                cursor: procesando ? 'not-allowed' : 'pointer',
+                opacity: procesando ? 0.6 : 1
+              }}
+            >
+              Mixto
+            </button>
             <button
               onClick={onCancelar}
               disabled={procesando}
@@ -115,7 +116,11 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                 backgroundColor: 'transparent',
                 color: '#666',
                 border: 'none',
-                padding: '10px',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 10px',
                 fontSize: '14px',
                 cursor: procesando ? 'not-allowed' : 'pointer'
               }}
@@ -129,14 +134,12 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
             <div style={{
-              backgroundColor: '#f4f4f5',
-              borderRadius: '10px',
-              padding: '12px',
+              padding: '0 2px',
               display: 'flex',
               justifyContent: 'space-between'
             }}>
-              <span style={{ color: '#666' }}>Pagado</span>
-              <span style={{ fontWeight: 'bold' }}>${totalPagado.toLocaleString()}</span>
+              <span style={{ color: '#666', fontSize: '14px' }}>Pagado</span>
+              <span style={{ fontWeight: 'bold', color: '#666', fontSize: '14px' }}>${totalPagado.toLocaleString()}</span>
             </div>
 
             <div style={{
@@ -168,15 +171,19 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                       <span>${pago.monto.toLocaleString()}</span>
                       <button
                         onClick={() => quitarPago(i)}
+                        aria-label="Quitar pago"
                         style={{
                           background: '#c0392b',
                           border: 'none',
                           color: 'white',
-                          borderRadius: '4px',
-                          width: '22px',
-                          height: '22px',
+                          borderRadius: '8px',
+                          width: '44px',
+                          height: '44px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           cursor: 'pointer',
-                          fontSize: '14px'
+                          fontSize: '18px'
                         }}
                       >
                         ×
@@ -200,7 +207,11 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                         color: metodoActual === m ? 'white' : '#1a1a1a',
                         border: metodoActual === m ? 'none' : '1px solid #ddd',
                         borderRadius: '8px',
-                        padding: '8px',
+                        minHeight: '44px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '0 6px',
                         fontSize: '12px',
                         cursor: 'pointer'
                       }}
@@ -227,12 +238,18 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                   />
                   <button
                     onClick={agregarPago}
+                    aria-label="Agregar pago"
                     style={{
                       backgroundColor: '#2a9d5c',
                       color: 'white',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '10px 16px',
+                      minHeight: '44px',
+                      minWidth: '44px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0 16px',
                       fontSize: '15px',
                       cursor: 'pointer'
                     }}
@@ -253,7 +270,11 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                   color: '#1a1a1a',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '12px',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 12px',
                   fontSize: '15px',
                   cursor: procesando ? 'not-allowed' : 'pointer',
                   opacity: procesando ? 0.6 : 1
@@ -270,7 +291,11 @@ function ModalPago({ total, onConfirmar, onCancelar, procesando = false }) {
                   color: falta === 0 ? 'white' : '#999',
                   border: 'none',
                   borderRadius: '8px',
-                  padding: '12px',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 12px',
                   fontSize: '15px',
                   cursor: (falta === 0 && !procesando) ? 'pointer' : 'not-allowed'
                 }}

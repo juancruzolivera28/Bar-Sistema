@@ -140,7 +140,7 @@ function Dashboard({ refrescar }) {
         type="number"
         value={form.monto}
         onChange={(e) => setForm({ ...form, monto: e.target.value })}
-        style={estiloInput}
+        style={{ ...estiloInput, fontSize: '20px', fontWeight: '600' }}
       />
       <select
         value={form.categoria}
@@ -225,18 +225,23 @@ function Dashboard({ refrescar }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '16px',
+        gap: '6px',
         marginBottom: '20px'
       }}>
         <button
           onClick={mesAnterior}
+          aria-label="Mes anterior"
           style={{
-            background: '#f4f4f5',
-            border: '1px solid #ccc',
+            background: 'none',
+            border: 'none',
             color: '#1a1a1a',
             borderRadius: '10px',
-            padding: '8px 16px',
-            fontSize: '16px',
+            width: '44px',
+            height: '44px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
             cursor: 'pointer'
           }}
         >
@@ -245,20 +250,25 @@ function Dashboard({ refrescar }) {
         <span style={{
           fontSize: '17px',
           fontWeight: 'bold',
-          minWidth: '160px',
+          minWidth: '140px',
           textAlign: 'center'
         }}>
           {nombreMes}
         </span>
         <button
           onClick={mesSiguiente}
+          aria-label="Mes siguiente"
           style={{
-            background: '#f4f4f5',
-            border: '1px solid #ccc',
+            background: 'none',
+            border: 'none',
             color: '#1a1a1a',
             borderRadius: '10px',
-            padding: '8px 16px',
-            fontSize: '16px',
+            width: '44px',
+            height: '44px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
             cursor: 'pointer'
           }}
         >
@@ -272,22 +282,22 @@ function Dashboard({ refrescar }) {
         gap: '10px',
         marginBottom: '20px'
       }}>
-        <div style={{ backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '16px' }}>
+        <div>
           <div style={{ color: '#666', fontSize: '12px' }}>Total Ganado</div>
-          <div style={{ fontSize: '26px', fontWeight: 'bold', color: '#2a9d5c' }}>
+          <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#2a9d5c' }}>
             ${totalGanado.toLocaleString()}
           </div>
         </div>
-        <div style={{ backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '16px' }}>
+        <div>
           <div style={{ color: '#666', fontSize: '12px' }}>Total Gastado</div>
-          <div style={{ fontSize: '26px', fontWeight: 'bold', color: '#c0392b' }}>
+          <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#c0392b' }}>
             ${totalGastado.toLocaleString()}
           </div>
         </div>
         <div style={{ backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '16px' }}>
           <div style={{ color: '#666', fontSize: '12px' }}>Ganancia Neta</div>
           <div style={{
-            fontSize: '26px',
+            fontSize: '32px',
             fontWeight: 'bold',
             color: neta >= 0 ? '#2a9d5c' : '#c0392b'
           }}>
@@ -304,13 +314,20 @@ function Dashboard({ refrescar }) {
         padding: '16px',
         marginBottom: '20px'
       }}>
-        <h3 style={{ color: '#666', margin: '0 0 12px 0' }}>
+        <h3 style={{
+          color: '#666',
+          margin: '0 0 12px 0',
+          fontSize: '12px',
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em'
+        }}>
           Ingresos ({ingresos.length})
         </h3>
         {ingresos.length === 0 ? (
           <p style={{ color: '#888', margin: 0 }}>Sin ingresos este mes.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {ingresos.map((ingreso) => {
               const numeroMesa = mesasPorId[ingreso.mesa_id]
               return (
@@ -318,9 +335,8 @@ function Dashboard({ refrescar }) {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  backgroundColor: '#ffffff',
-                  borderRadius: '10px',
-                  padding: '10px 14px'
+                  borderBottom: '1px solid #e0e0e0',
+                  padding: '10px 4px'
                 }}>
                   <div>
                     <div style={{ fontSize: '13px', color: '#666' }}>
@@ -346,21 +362,27 @@ function Dashboard({ refrescar }) {
         padding: '16px',
         marginBottom: '20px'
       }}>
-        <h3 style={{ color: '#666', margin: '0 0 12px 0' }}>
+        <h3 style={{
+          color: '#666',
+          margin: '0 0 12px 0',
+          fontSize: '12px',
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          letterSpacing: '0.06em'
+        }}>
           Gastos ({gastos.length})
         </h3>
         {gastos.length === 0 ? (
           <p style={{ color: '#888', margin: 0 }}>Sin gastos este mes.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             {gastos.map((gasto) => (
               <div key={gasto.id} style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                backgroundColor: '#ffffff',
-                borderRadius: '10px',
-                padding: '10px 14px',
+                borderBottom: '1px solid #e0e0e0',
+                padding: '10px 4px',
                 gap: '10px',
                 flexWrap: 'wrap'
               }}>

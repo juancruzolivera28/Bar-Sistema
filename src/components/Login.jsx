@@ -31,10 +31,10 @@ function Login({ necesitaCrearRestaurante, onListo }) {
 
   return (
     <div style={estilos.pantalla}>
-      <h2 style={{ margin: '0 0 4px 0', fontSize: '24px', color: '#1a1a1a' }}>
+      <h2 style={{ margin: '0 0 8px 0', fontSize: '32px', fontWeight: '700', color: '#1a1a1a' }}>
         Bar Sistema
       </h2>
-      <p style={{ color: '#666', margin: '0 0 32px 0', fontSize: '14px' }}>
+      <p style={{ color: '#666', margin: '0 0 36px 0', fontSize: '14px' }}>
         ¿Cómo querés entrar?
       </p>
 

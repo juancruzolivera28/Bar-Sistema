@@ -198,28 +198,27 @@ function Stock({ refrescarStock }) {
 
       {productosBajoStock.length > 0 && (
         <div style={{
-          backgroundColor: '#e07b00',
-          color: 'white',
-          padding: '12px',
-          borderRadius: '10px',
+          backgroundColor: '#fff4e0',
+          color: '#1a1a1a',
+          padding: '12px 14px',
+          borderRadius: '8px',
           marginBottom: '16px',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          fontSize: '14px'
         }}>
-          ⚠ {productosBajoStock.length} productos con stock bajo
+          {productosBajoStock.length} productos con stock bajo
         </div>
       )}
 
       {nuevoProducto && formulario}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         {productos.map((producto) => (
           <div key={producto.id}>
             {editando === producto.id ? formulario : (
               <div style={{
-                backgroundColor: '#f4f4f5',
-                border: '1px solid #e0e0e0',
-                borderRadius: '12px',
-                padding: '14px 16px',
+                borderBottom: '1px solid #e0e0e0',
+                padding: '14px 4px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
@@ -232,7 +231,7 @@ function Stock({ refrescarStock }) {
                     ${producto.precio.toLocaleString()}
                   </div>
                   <div style={{ fontSize: '12px', color: '#666' }}>
-                    Mín: {producto.stockMinimo || 0}
+                    Stock mínimo: {producto.stockMinimo || 0}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -249,11 +248,15 @@ function Stock({ refrescarStock }) {
                   <button
                     onClick={() => abrirEdicion(producto)}
                     style={{
-                      background: '#e0e0e0',
+                      background: 'none',
                       border: 'none',
-                      color: '#1a1a1a',
-                      borderRadius: '6px',
-                      padding: '6px 12px',
+                      color: '#666',
+                      borderRadius: '8px',
+                      minHeight: '44px',
+                      padding: '0 10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       cursor: 'pointer',
                       fontSize: '13px'
                     }}
@@ -266,8 +269,12 @@ function Stock({ refrescarStock }) {
                       background: '#c0392b',
                       border: 'none',
                       color: 'white',
-                      borderRadius: '6px',
-                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      minHeight: '44px',
+                      padding: '0 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       cursor: 'pointer',
                       fontSize: '13px'
                     }}

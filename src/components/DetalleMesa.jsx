@@ -233,7 +233,14 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
         <h2 style={{ margin: 0 }}>{mesa.nombre || `Mesa ${mesa.numero}`}</h2>
       </div>
 
-      <h3 style={{ color: '#666', marginBottom: '10px' }}>Agregar productos</h3>
+      <h3 style={{
+        color: '#666',
+        marginBottom: '10px',
+        fontSize: '12px',
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: '0.06em'
+      }}>Agregar productos</h3>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
@@ -262,7 +269,7 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
         ))}
       </div>
 
-      <h3 style={{ color: '#666', marginBottom: '10px' }}>Pedido actual</h3>
+      <h3 style={{ color: '#1a1a1a', marginBottom: '10px', fontSize: '15px', fontWeight: '700' }}>Pedido actual</h3>
       {pedidos.length === 0 ? (
         <p style={{ color: '#888' }}>Sin productos todavía.</p>
       ) : (
@@ -295,14 +302,18 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
                   <button
                     onClick={() => quitarProducto(pedido)}
                     disabled={filaOptimista}
+                    aria-label={`Quitar ${pedido.nombre}`}
                     style={{
                       background: '#c0392b',
                       border: 'none',
                       color: 'white',
-                      borderRadius: '6px',
-                      width: '28px',
-                      height: '28px',
-                      fontSize: '16px',
+                      borderRadius: '8px',
+                      width: '44px',
+                      height: '44px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '18px',
                       cursor: filaOptimista ? 'not-allowed' : 'pointer',
                       opacity: filaOptimista ? 0.5 : 1
                     }}
@@ -329,7 +340,7 @@ function DetalleMesa({ mesa, onVolver, onActualizarMesa, onToast, refrescar }) {
       }}>
         <div>
           <div style={{ color: '#666', fontSize: '13px' }}>Total</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold' }}>${total.toLocaleString()}</div>
+          <div style={{ fontSize: '30px', fontWeight: 'bold' }}>${total.toLocaleString()}</div>
         </div>
         <button
           onClick={() => setMostrarModalPago(true)}

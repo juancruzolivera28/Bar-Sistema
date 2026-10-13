@@ -50,7 +50,15 @@ function LoginMozo({ onListo, onVolver }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <input
-          style={{ ...estilos.input, textTransform: 'uppercase', letterSpacing: '2px', textAlign: 'center', fontWeight: 'bold' }}
+          style={{
+            ...estilos.input,
+            textTransform: 'uppercase',
+            letterSpacing: '4px',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: '20px',
+            fontFamily: 'var(--mono)'
+          }}
           placeholder="EJ: VUELO7X"
           maxLength={8}
           value={codigo}

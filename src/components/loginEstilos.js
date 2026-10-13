@@ -34,9 +34,9 @@ export const estilos = {
   },
   botonSecundario: {
     width: '260px',
-    backgroundColor: '#f4f4f5',
+    backgroundColor: 'transparent',
     color: '#1a1a1a',
-    border: '1px solid #ddd',
+    border: '1px solid #ccc',
     borderRadius: '10px',
     padding: '14px',
     fontSize: '15px',

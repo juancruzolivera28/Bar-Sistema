@@ -181,7 +181,11 @@ function LoginDueno({ onListo, forzarCrearRestaurante, onVolver }) {
 
             {error && <p style={estilos.error}>{error}</p>}
 
-            <div style={{ marginTop: '20px' }}>
+            <div style={{
+              marginTop: '28px',
+              paddingTop: '20px',
+              borderTop: '1px solid #e0e0e0'
+            }}>
               <button style={estilos.link} onClick={volverALogin}>
                 Volver
               </button>
@@ -230,7 +234,15 @@ function LoginDueno({ onListo, forzarCrearRestaurante, onVolver }) {
 
       {error && <p style={estilos.error}>{error}</p>}
 
-      <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+      <div style={{
+        marginTop: '28px',
+        paddingTop: '20px',
+        borderTop: '1px solid #e0e0e0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        alignItems: 'center'
+      }}>
         {modo === 'login' && (
           <button
             style={estilos.link}
