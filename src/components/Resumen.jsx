@@ -91,11 +91,11 @@ function Resumen() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '10px'
           }}
         >
-          <div>
+          <div style={estiloTarjeta}>
             <div style={{ color: '#666', fontSize: '12px' }}>
               Mesas cerradas
             </div>
@@ -104,7 +104,7 @@ function Resumen() {
             </div>
           </div>
 
-          <div>
+          <div style={estiloTarjeta}>
             <div style={{ color: '#666', fontSize: '12px' }}>
               Ticket promedio
             </div>
@@ -113,7 +113,7 @@ function Resumen() {
             </div>
           </div>
 
-          <div>
+          <div style={estiloTarjeta}>
             <div style={{ color: '#666', fontSize: '12px' }}>
               Más vendido
             </div>
@@ -129,12 +129,7 @@ function Resumen() {
         </div>
       </div>
 
-      <div style={{
-        backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0',
-        borderRadius: '12px',
-        padding: '20px',
-        marginBottom: '20px'
-      }}>
+      <div style={{ marginBottom: '20px' }}>
         <div style={{ color: '#666', fontSize: '13px', marginBottom: '4px' }}>Total del día</div>
         <div style={{ fontSize: '40px', fontWeight: 'bold', marginBottom: '16px' }}>
           ${datos.totalGeneral.toLocaleString()}
@@ -142,16 +137,11 @@ function Resumen() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
           {[
-            { key: 'efectivo', label: 'Efectivo', color: '#2a9d5c' },
-            { key: 'transferencia', label: 'Transferencia', color: '#1a73e8' },
-            { key: 'tarjeta', label: 'Tarjeta', color: '#8e44ad' },
-          ].map(({ key, label, color }) => (
-            <div key={key} style={{
-              backgroundColor: '#ffffff', border: '1px solid #e0e0e0',
-              borderRadius: '10px',
-              padding: '12px',
-              borderTop: `3px solid ${color}`
-            }}>
+            { key: 'efectivo', label: 'Efectivo' },
+            { key: 'transferencia', label: 'Transferencia' },
+            { key: 'tarjeta', label: 'Tarjeta' },
+          ].map(({ key, label }) => (
+            <div key={key} style={estiloTarjeta}>
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>{label}</div>
               <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
                 ${(datos.totales[key] || 0).toLocaleString()}
@@ -263,6 +253,13 @@ function Resumen() {
       )}
     </div>
   )
+}
+
+const estiloTarjeta = {
+  border: '1px solid #e0e0e0',
+  backgroundColor: '#ffffff',
+  borderRadius: '12px',
+  padding: '16px'
 }
 
 export default Resumen

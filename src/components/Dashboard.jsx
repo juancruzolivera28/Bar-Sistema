@@ -278,26 +278,26 @@ function Dashboard({ refrescar }) {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
         gap: '10px',
         marginBottom: '20px'
       }}>
-        <div>
+        <div style={estiloTarjeta}>
           <div style={{ color: '#666', fontSize: '12px' }}>Total Ganado</div>
           <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#2a9d5c' }}>
             ${totalGanado.toLocaleString()}
           </div>
         </div>
-        <div>
+        <div style={estiloTarjeta}>
           <div style={{ color: '#666', fontSize: '12px' }}>Total Gastado</div>
           <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#c0392b' }}>
             ${totalGastado.toLocaleString()}
           </div>
         </div>
-        <div style={{ backgroundColor: '#f4f4f5', border: '1px solid #e0e0e0', borderRadius: '12px', padding: '16px' }}>
+        <div style={estiloTarjeta}>
           <div style={{ color: '#666', fontSize: '12px' }}>Ganancia Neta</div>
           <div style={{
-            fontSize: '32px',
+            fontSize: '20px',
             fontWeight: 'bold',
             color: neta >= 0 ? '#2a9d5c' : '#c0392b'
           }}>
@@ -420,6 +420,13 @@ function Dashboard({ refrescar }) {
       </div>
     </div>
   )
+}
+
+const estiloTarjeta = {
+  border: '1px solid #e0e0e0',
+  backgroundColor: '#ffffff',
+  borderRadius: '12px',
+  padding: '16px'
 }
 
 const estiloInput = {
