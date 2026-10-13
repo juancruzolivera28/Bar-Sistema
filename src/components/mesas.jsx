@@ -1,8 +1,11 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { getAll, agregar, eliminar } from '../db/database.js'
+import { useLongPress, LONG_PRESS_MS } from './useLongPress.js'
+import ModalConfirmarEliminarMesa from './ModalConfirmarEliminarMesa.jsx'
 
-const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
+const Mesas = forwardRef(function Mesas({ onSeleccionarMesa, onToast }, ref) {
   const [mesas, setMesas] = useState([])
+  const [mesaAEliminar, setMesaAEliminar] = useState(null)
 
   useImperativeHandle(ref, () => ({
     recargar: cargarMesas
@@ -44,14 +47,27 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
   }
 
   async function eliminarMesaExtra(mesa) {
-    if (mesa.estado !== 'libre') {
-      alert('Solo se pueden eliminar mesas libres.')
-      return
-    }
-    const confirmar = window.confirm(`¿Eliminar Mesa ${mesa.numero}?`)
-    if (!confirmar) return
     await eliminar('mesas', mesa.id)
     cargarMesas()
+  }
+
+  function manejarLongPressExtra(mesa) {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(30)
+    }
+    if (mesa.estado !== 'libre') {
+      onToast?.('Solo se pueden eliminar mesas libres.', 'error')
+      return
+    }
+    setMesaAEliminar(mesa)
+  }
+
+  const { presionando, obtenerHandlers } = useLongPress(manejarLongPressExtra)
+
+  async function confirmarEliminarMesaExtra() {
+    const mesa = mesaAEliminar
+    setMesaAEliminar(null)
+    if (mesa) await eliminarMesaExtra(mesa)
   }
 
   function TarjetaMesa({ mesa, ancho, alto }) {
@@ -163,6 +179,8 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
             {mesasExtras.map(mesa => (
               <div
                 key={mesa.id}
+                {...obtenerHandlers(mesa, onSeleccionarMesa)}
+                className={presionando === mesa.id ? 'mesa-card-presionando' : undefined}
                 style={{
                   backgroundColor: colorEstado(mesa.estado),
                   borderRadius: '10px',
@@ -177,41 +195,46 @@ const Mesas = forwardRef(function Mesas({ onSeleccionarMesa }, ref) {
                   fontWeight: 'bold',
                   fontSize: '13px',
                   position: 'relative',
-                  userSelect: 'none'
+                  overflow: 'hidden',
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
+                  WebkitTouchCallout: 'none',
+                  touchAction: 'pan-y',
+                  transform: presionando === mesa.id ? 'scale(0.95)' : 'scale(1)',
+                  transition: 'transform 150ms ease'
                 }}
-                onClick={() => onSeleccionarMesa(mesa)}
               >
                 <div>Mesa {mesa.numero}</div>
                 <div style={{ fontSize: '11px', opacity: 0.8, marginTop: '2px' }}>
                   {mesa.estado === 'libre' ? 'Libre' : mesa.estado === 'ocupada' ? 'Ocupada' : 'Cuenta'}
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); eliminarMesaExtra(mesa) }}
-                  style={{
+                {presionando === mesa.id && (
+                  <div style={{
                     position: 'absolute',
-                    top: '4px',
-                    right: '4px',
-                    background: 'rgba(0,0,0,0.25)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    color: 'white',
-                    width: '20px',
-                    height: '20px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    lineHeight: '20px',
-                    textAlign: 'center',
-                    padding: 0
-                  }}
-                >
-                  ×
-                </button>
+                    left: 0, right: 0, bottom: 0,
+                    height: '4px',
+                    backgroundColor: 'rgba(0,0,0,0.2)'
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      backgroundColor: '#ffd166',
+                      width: '0%',
+                      animation: `mesaLongPressProgreso ${LONG_PRESS_MS}ms linear forwards`
+                    }} />
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
       </div>
+
+      <ModalConfirmarEliminarMesa
+        mesa={mesaAEliminar}
+        onConfirmar={confirmarEliminarMesaExtra}
+        onCancelar={() => setMesaAEliminar(null)}
+      />
     </div>
   )
 })

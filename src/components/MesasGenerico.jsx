@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { getAll, agregar, eliminar } from '../db/database.js'
+import { useLongPress, LONG_PRESS_MS } from './useLongPress.js'
+import ModalConfirmarEliminarMesa from './ModalConfirmarEliminarMesa.jsx'
 
 // Layout GENERICO de mesas: grid responsive simple con las mesas 1..N del
 // restaurante actual. Se usa para todos los restaurantes MENOS Vuelos Bar,
@@ -13,18 +15,9 @@ import { getAll, agregar, eliminar } from '../db/database.js'
 // recargar()), mas onToast (opcional, solo lo usa este layout para el aviso
 // de "mesa no libre" al eliminar) para que sean intercambiables sin tocar el
 // resto de App.jsx.
-const LONG_PRESS_MS = 600
-const UMBRAL_MOVIMIENTO_PX = 10
-
 const MesasGenerico = forwardRef(function MesasGenerico({ onSeleccionarMesa, onToast }, ref) {
   const [mesas, setMesas] = useState([])
-  const [presionando, setPresionando] = useState(null)
   const [mesaAEliminar, setMesaAEliminar] = useState(null)
-
-  const timerRef = useRef(null)
-  const disparadoRef = useRef(false)
-  const inicioRef = useRef({ x: 0, y: 0 })
-  const mesaActivaIdRef = useRef(null)
 
   useImperativeHandle(ref, () => ({
     recargar: cargarMesas
@@ -32,12 +25,6 @@ const MesasGenerico = forwardRef(function MesasGenerico({ onSeleccionarMesa, onT
 
   useEffect(() => {
     cargarMesas()
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
   }, [])
 
   async function cargarMesas() {
@@ -64,25 +51,10 @@ const MesasGenerico = forwardRef(function MesasGenerico({ onSeleccionarMesa, onT
     cargarMesas()
   }
 
-  function cancelarPresion() {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
-    mesaActivaIdRef.current = null
-    setPresionando(null)
-  }
-
-  function dispararLongPress(mesa) {
-    disparadoRef.current = true
-    timerRef.current = null
-    mesaActivaIdRef.current = null
-    setPresionando(null)
-
+  function manejarLongPress(mesa) {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(30)
     }
-
     if (mesa.estado !== 'libre') {
       onToast?.('Solo se pueden eliminar mesas libres.', 'error')
       return
@@ -90,29 +62,7 @@ const MesasGenerico = forwardRef(function MesasGenerico({ onSeleccionarMesa, onT
     setMesaAEliminar(mesa)
   }
 
-  function manejarPointerDown(e, mesa) {
-    if (e.pointerType === 'mouse' && e.button !== 0) return
-    disparadoRef.current = false
-    inicioRef.current = { x: e.clientX, y: e.clientY }
-    mesaActivaIdRef.current = mesa.id
-    setPresionando(mesa.id)
-    timerRef.current = setTimeout(() => dispararLongPress(mesa), LONG_PRESS_MS)
-  }
-
-  function manejarPointerMove(e, mesa) {
-    if (mesaActivaIdRef.current !== mesa.id) return
-    const dx = e.clientX - inicioRef.current.x
-    const dy = e.clientY - inicioRef.current.y
-    if (Math.sqrt(dx * dx + dy * dy) > UMBRAL_MOVIMIENTO_PX) cancelarPresion()
-  }
-
-  function manejarClick(mesa) {
-    if (disparadoRef.current) {
-      disparadoRef.current = false
-      return
-    }
-    onSeleccionarMesa(mesa)
-  }
+  const { presionando, obtenerHandlers } = useLongPress(manejarLongPress)
 
   async function confirmarEliminarMesa() {
     const mesa = mesaAEliminar
@@ -132,13 +82,7 @@ const MesasGenerico = forwardRef(function MesasGenerico({ onSeleccionarMesa, onT
         {mesas.map(mesa => (
           <div
             key={mesa.id}
-            onClick={() => manejarClick(mesa)}
-            onPointerDown={(e) => manejarPointerDown(e, mesa)}
-            onPointerMove={(e) => manejarPointerMove(e, mesa)}
-            onPointerUp={cancelarPresion}
-            onPointerLeave={cancelarPresion}
-            onPointerCancel={cancelarPresion}
-            onContextMenu={(e) => e.preventDefault()}
+            {...obtenerHandlers(mesa, onSeleccionarMesa)}
             className={presionando === mesa.id ? 'mesa-card-presionando' : undefined}
             style={{
               backgroundColor: colorEstado(mesa.estado),
@@ -202,64 +146,11 @@ const MesasGenerico = forwardRef(function MesasGenerico({ onSeleccionarMesa, onT
         </button>
       </div>
 
-      {mesaAEliminar && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '16px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            padding: '24px',
-            width: '100%',
-            maxWidth: '360px',
-            color: '#1a1a1a',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.2)'
-          }}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '18px' }}>
-              ¿Eliminar Mesa {mesaAEliminar.numero}?
-            </h3>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={() => setMesaAEliminar(null)}
-                style={{
-                  flex: 1,
-                  backgroundColor: '#e0e0e0',
-                  color: '#1a1a1a',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  fontSize: '15px',
-                  cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmarEliminarMesa}
-                style={{
-                  flex: 1,
-                  backgroundColor: '#c0392b',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  fontSize: '15px',
-                  cursor: 'pointer'
-                }}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ModalConfirmarEliminarMesa
+        mesa={mesaAEliminar}
+        onConfirmar={confirmarEliminarMesa}
+        onCancelar={() => setMesaAEliminar(null)}
+      />
     </div>
   )
 })
