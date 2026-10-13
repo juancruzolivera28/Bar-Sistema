@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { initDB, setOnError, setRestauranteId as fijarRestauranteActivo } from './db/database.js'
+import { initDB, setOnError, getRestauranteId, setRestauranteId as fijarRestauranteActivo } from './db/database.js'
+import { vaciarCache } from './cacheMemoria.js'
 import { supabase } from './db/supabaseClient.js'
 import Mesas from './components/mesas.jsx'
 import MesasGenerico from './components/MesasGenerico.jsx'
@@ -60,6 +61,17 @@ function App() {
     setRefrescarGlobal(r => r + 1)
   }
 
+  // Unico punto donde se fija el restaurante activo (igual que
+  // fijarRestauranteActivo en si). Si cambia respecto al anterior -incluido
+  // pasar a null por cierre de sesion- vacia la cache en memoria de
+  // Dashboard/Resumen/CodigoAcceso para que nunca le muestre al nuevo
+  // restaurante (o a nadie) el dato cacheado del anterior.
+  function fijarRestauranteYLimpiarCache(nuevoId) {
+    const anterior = getRestauranteId()
+    if (anterior && anterior !== nuevoId) vaciarCache()
+    fijarRestauranteActivo(nuevoId)
+  }
+
   useEffect(() => {
     setOnError((mensaje) => mostrarToast(mensaje, 'error'))
 
@@ -87,7 +99,7 @@ function App() {
           return
         }
         if (data) {
-          fijarRestauranteActivo(data.id)
+          fijarRestauranteYLimpiarCache(data.id)
           setRestauranteId(data.id)
           setNombreRestaurante(data.nombre)
           setNecesitaCrearRestaurante(false)
@@ -105,14 +117,14 @@ function App() {
       // B) Sin sesion de dueño: ver si el dispositivo ya tiene codigo de mozo
       const ridGuardado = localStorage.getItem(LS_RESTAURANTE)
       if (ridGuardado) {
-        fijarRestauranteActivo(ridGuardado)
+        fijarRestauranteYLimpiarCache(ridGuardado)
         setRestauranteId(ridGuardado)
         setRol('mozo')
         setPantalla('mesas')
       } else {
         // C) Nadie: pantalla de Login
         detenerSync()
-        fijarRestauranteActivo(null)
+        fijarRestauranteYLimpiarCache(null)
         setRestauranteId(null)
         setNombreRestaurante('')
         setNecesitaCrearRestaurante(false)
@@ -177,7 +189,7 @@ function App() {
     // Red de seguridad: Realtime avisa los cambios al toque, pero si por lo
     // que sea (wifi rara, service worker viejo, etc.) un dispositivo no
     // recibe el evento, este intervalo lo termina poniendo al día solo.
-    const intervalo = setInterval(refrescarTodo, 5000)
+    const intervalo = setInterval(refrescarTodo, 15000)
     return () => clearInterval(intervalo)
   }, [dbReady, restauranteId])
 
@@ -198,7 +210,7 @@ function App() {
     } else {
       localStorage.removeItem(LS_RESTAURANTE)
       detenerSync()
-      fijarRestauranteActivo(null)
+      fijarRestauranteYLimpiarCache(null)
       setRevalidarSesion(n => n + 1)
     }
   }

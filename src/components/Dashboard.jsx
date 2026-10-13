@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { getAll, agregar, eliminar } from '../db/database.js'
+import { getAll, getEntreFechas, agregar, eliminar, getRestauranteId } from '../db/database.js'
+import { leerCache, escribirCache } from '../cacheMemoria.js'
 
 const CATEGORIAS = ['Proveedores', 'Sueldos', 'Servicios', 'Alquiler', 'Otros']
 
@@ -30,29 +31,41 @@ function Dashboard({ refrescar }) {
   }, [mes, anio, refrescar])
 
   async function cargarDatos() {
+    const restauranteId = getRestauranteId()
+    const claveMes = `${anio}-${mes}`
+
+    // Si hay un ultimo dato conocido de este mes para este restaurante, lo
+    // mostramos de entrada (sin esperar la red) mientras se refresca abajo.
+    const cacheado = leerCache(restauranteId, 'dashboard', claveMes)
+    if (cacheado) {
+      setIngresos(cacheado.ingresos)
+      setGastos(cacheado.gastos)
+      setMesasPorId(cacheado.mesasPorId)
+    }
+
     const inicio = new Date(anio, mes, 1).getTime()
     const fin = new Date(anio, mes + 1, 1).getTime()
 
-    const [todoHistorial, todosGastos, todasMesas] = await Promise.all([
-      getAll('historial'),
-      getAll('gastos'),
+    const [historialMes, gastosMes, todasMesas] = await Promise.all([
+      getEntreFechas('historial', 'fecha', inicio, fin),
+      getEntreFechas('gastos', 'fecha', inicio, fin),
       getAll('mesas')
     ])
 
     const lookup = {}
     todasMesas.forEach(m => { lookup[m.id] = m.numero })
-    setMesasPorId(lookup)
 
-    setIngresos(
-      todoHistorial
-        .filter(h => h.fecha >= inicio && h.fecha < fin)
-        .sort((a, b) => b.fecha - a.fecha)
-    )
-    setGastos(
-      todosGastos
-        .filter(g => g.fecha >= inicio && g.fecha < fin)
-        .sort((a, b) => b.fecha - a.fecha)
-    )
+    const ingresosOrdenados = historialMes.sort((a, b) => b.fecha - a.fecha)
+    const gastosOrdenados = gastosMes.sort((a, b) => b.fecha - a.fecha)
+
+    setMesasPorId(lookup)
+    setIngresos(ingresosOrdenados)
+    setGastos(gastosOrdenados)
+    escribirCache(restauranteId, 'dashboard', claveMes, {
+      ingresos: ingresosOrdenados,
+      gastos: gastosOrdenados,
+      mesasPorId: lookup
+    })
   }
 
   function mesAnterior() {

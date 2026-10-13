@@ -84,6 +84,19 @@ export async function getByIndex(storeName, indexName, value) {
   return data
 }
 
+// Igual que getAll pero filtrando por un rango [desde, hasta) sobre `campo`
+// del lado del servidor (desde inclusive, hasta exclusive). Pensado para
+// columnas de fecha en epoch ms (historial.fecha, gastos.fecha).
+export async function getEntreFechas(storeName, campo, desde, hasta) {
+  let consulta = supabase.from(storeName).select('*').gte(campo, desde).lt(campo, hasta)
+  if (aplicaRestaurante(storeName)) {
+    consulta = consulta.eq('restaurante_id', restauranteIdActivo)
+  }
+  const { data, error } = await consulta
+  if (error) manejarError(`getEntreFechas ${storeName}`, error)
+  return data
+}
+
 export async function getOne(storeName, key) {
   const clave = CLAVES_PRIMARIAS[storeName] || 'id'
   let consulta = supabase.from(storeName).select('*').eq(clave, key)

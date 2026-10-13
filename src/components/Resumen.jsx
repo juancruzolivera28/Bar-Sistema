@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../db/supabaseClient.js'
 import { getRestauranteId } from '../db/database.js'
+import { leerCache, escribirCache } from '../cacheMemoria.js'
 
 function Resumen() {
-  const [datos, setDatos] = useState(null)
-
   function calcularTurno() {
     const ahora = new Date()
     const hora = ahora.getHours()
@@ -21,6 +20,10 @@ function Resumen() {
 
     return { inicio: inicioTurno.getTime(), fin: finTurno.getTime() }
   }
+
+  const restauranteId = getRestauranteId()
+  const claveTurno = calcularTurno().inicio
+  const [datos, setDatos] = useState(() => leerCache(restauranteId, 'resumen', claveTurno) ?? null)
 
   const RESUMEN_VACIO = {
     cuentas: [],
@@ -47,7 +50,10 @@ function Resumen() {
 
     if (error || !data) {
       console.error('resumen_turno:', error)
-      setDatos(RESUMEN_VACIO)
+      // Si ya habia datos (de cache o de una carga previa), los dejamos: no
+      // los pisamos con el vacio. Sin nada previo, mismo comportamiento de
+      // siempre.
+      setDatos(prev => prev ?? RESUMEN_VACIO)
       return
     }
 
@@ -58,7 +64,7 @@ function Resumen() {
       fechaHora: new Date(c.fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
     }))
 
-    setDatos({
+    const nuevosDatos = {
       cuentas,
       totales: data.totales || RESUMEN_VACIO.totales,
       totalGeneral: data.totalGeneral || 0,
@@ -66,7 +72,9 @@ function Resumen() {
       cantidadMesas: data.cantidadMesas || 0,
       ticketPromedio: data.ticketPromedio || 0,
       productoMasVendido: data.productoMasVendido || '-'
-    })
+    }
+    setDatos(nuevosDatos)
+    escribirCache(restauranteId, 'resumen', claveTurno, nuevosDatos)
   }
 
   useEffect(() => {

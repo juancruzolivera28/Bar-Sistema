@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../db/supabaseClient.js'
+import { leerCache, escribirCache } from '../cacheMemoria.js'
 
 // Pantalla (solo dueño) para ver y regenerar el codigo_acceso del
 // restaurante. Los mozos lo usan una unica vez en su dispositivo para
 // vincularse (LoginMozo.jsx). Sin esta pantalla, un restaurante nuevo no
 // tiene forma de dar de alta a sus mozos.
 function CodigoAcceso({ restauranteId }) {
-  const [codigo, setCodigo] = useState(null)
-  const [cargando, setCargando] = useState(true)
+  const codigoCacheado = leerCache(restauranteId, 'codigo', null)
+  const [codigo, setCodigo] = useState(codigoCacheado ?? null)
+  // Si ya habia un codigo en cache arrancamos sin el "Cargando...": se
+  // muestra de entrada y cargarCodigo() lo refresca atras.
+  const [cargando, setCargando] = useState(codigoCacheado == null)
   const [error, setError] = useState('')
   const [copiado, setCopiado] = useState(false)
   const [regenerando, setRegenerando] = useState(false)
 
-  // Carga inicial del codigo. `cargando` ya arranca en true y solo se carga
-  // una vez, asi que no hace falta volver a setearlo aca (y evita setState
-  // sincrono dentro del efecto).
+  // Carga inicial del codigo. `cargando` ya arranca en true (salvo que haya
+  // cache) y solo se carga una vez, asi que no hace falta volver a setearlo
+  // aca (y evita setState sincrono dentro del efecto).
   async function cargarCodigo() {
     const { data, error: err } = await supabase
       .from('restaurantes')
@@ -23,10 +27,14 @@ function CodigoAcceso({ restauranteId }) {
       .maybeSingle()
     setCargando(false)
     if (err || !data) {
+      // Si ya se estaba mostrando un codigo (de cache o de una carga previa
+      // en esta sesion), lo dejamos: no rompemos la pantalla por un fallo
+      // de refresco en segundo plano.
       setError('No se pudo cargar el código.')
       return
     }
     setCodigo(data.codigo_acceso)
+    escribirCache(restauranteId, 'codigo', null, data.codigo_acceso)
   }
 
   useEffect(() => {
@@ -63,6 +71,7 @@ function CodigoAcceso({ restauranteId }) {
       return
     }
     setCodigo(data)
+    escribirCache(restauranteId, 'codigo', null, data)
     setCopiado(false)
   }
 
