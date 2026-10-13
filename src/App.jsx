@@ -276,6 +276,7 @@ function App() {
           ref={mesasRef}
           key={mesaSeleccionada ? 'con-mesa' : 'sin-mesa'}
           onSeleccionarMesa={(mesa) => setMesaSeleccionada(mesa)}
+          onToast={mostrarToast}
         />
       )}
 

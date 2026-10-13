@@ -47,3 +47,15 @@ h2 {
   font-weight: 600;
   color: #1a1a1a;
 }
+
+/* Barra de progreso del long-press para eliminar mesa (MesasGenerico.jsx). */
+@keyframes mesaLongPressProgreso {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mesa-card-presionando {
+    transform: none !important;
+  }
+}
